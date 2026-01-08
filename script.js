@@ -544,15 +544,20 @@
   }
 
   // CTA click: här kan du välja att navigera till en ny sida, öppna modal, etc.
-  function onCTA() {
-    dlPush("result_cta_click", {
-      quiz_id: "ma_stack_quiz_v1",
-      cta_type: "recommended_setup",
-    });
+function onCTA() {
+  const scores = computeScores();
+  const chosen = pickStack(scores);
 
-    // Vibe: just show an alert for now. Byt till en riktig sida senare.
-    alert("Nice. Nästa steg: bygg en sida som visar setup per stack + spåra scroll/click på moduler.");
-  }
+  dlPush("result_cta_click", {
+    quiz_id: "ma_stack_quiz_v1",
+    cta_type: "recommended_setup",
+    result_stack: chosen.key,
+  });
+
+  // Navigera till setup-sidan och skicka med stack i URL
+  window.location.href = `setup.html?stack=${encodeURIComponent(chosen.key)}`;
+}
+
 
   // ----------------------------
   // 7) Wire up

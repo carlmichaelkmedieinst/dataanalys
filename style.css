@@ -243,3 +243,17 @@ code{
   gap: 12px;
   flex-wrap: wrap;
 }
+/* Force readable text on dark background (form controls + quiz buttons) */
+button,
+input,
+select,
+textarea {
+  color: var(--text);
+  background-color: transparent;
+}
+
+/* Ensure answer buttons inherit white text */
+.answer {
+  color: var(--text);
+}
+

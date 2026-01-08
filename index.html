@@ -1,0 +1,123 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vilken Marketing Automation-stack passar dig?</title>
+  <meta name="description" content="Ett snabbt mognadstest som ger en rekommenderad Marketing Automation-stack." />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- GTM: Klistra in din GTM-container här när du är redo.
+       Viktigt: Den här sidan använder window.dataLayer.push(...) för events. -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+  </script>
+</head>
+
+<body>
+  <main class="wrap">
+    <header class="header">
+      <div class="badge">MA Stack Quiz</div>
+      <h1>Vilken Marketing Automation-stack passar dig?</h1>
+      <p class="sub">
+        Svara på 10 snabba frågor. Du får en rekommendation baserat på komplexitet, datamognad och säljberoende.
+      </p>
+    </header>
+
+    <section id="card" class="card" aria-live="polite">
+      <!-- Intro -->
+      <div id="screen-intro" class="screen">
+        <ul class="bullets">
+          <li>Tar ~2–3 minuter</li>
+          <li>Inga personuppgifter</li>
+          <li>Byggd för att spåras i GA4 via GTM</li>
+        </ul>
+
+        <div class="row">
+          <button id="btn-start" class="btn primary">Starta quiz</button>
+          <button id="btn-demo-fill" class="btn ghost" type="button" title="Fyll i slumpade svar (för test)">Demo-fill</button>
+        </div>
+
+        <div class="fine">
+          Tips: Öppna DevTools → Console och kolla <code>dataLayer</code> när du klickar runt.
+        </div>
+      </div>
+
+      <!-- Quiz -->
+      <div id="screen-quiz" class="screen hidden">
+        <div class="topbar">
+          <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+            <div id="progress-bar" class="progress__bar"></div>
+          </div>
+          <div id="progress-text" class="progress__text">Fråga 1 av 10</div>
+        </div>
+
+        <div class="q">
+          <div id="q-tag" class="q__tag">Dimension: —</div>
+          <h2 id="q-title" class="q__title">—</h2>
+          <p id="q-help" class="q__help">—</p>
+        </div>
+
+        <div id="answers" class="answers" role="group" aria-label="Svarsalternativ">
+          <!-- Buttons renderas via JS -->
+        </div>
+
+        <div class="nav">
+          <button id="btn-back" class="btn ghost" type="button">Tillbaka</button>
+          <button id="btn-next" class="btn primary" type="button" disabled>Nästa</button>
+        </div>
+
+        <div class="fine">
+          <span id="state-hint">Välj ett svar för att gå vidare.</span>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div id="screen-result" class="screen hidden">
+        <div class="result">
+          <div id="result-badge" class="result__badge">Din stack</div>
+          <h2 id="result-title" class="result__title">—</h2>
+          <p id="result-summary" class="result__summary">—</p>
+
+          <div class="result__grid">
+            <div class="metric">
+              <div class="metric__label">Komplexitet</div>
+              <div id="m-complexity" class="metric__value">—</div>
+              <div id="m-complexity-note" class="metric__note">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric__label">Datamognad</div>
+              <div id="m-data" class="metric__value">—</div>
+              <div id="m-data-note" class="metric__note">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric__label">Säljberoende</div>
+              <div id="m-sales" class="metric__value">—</div>
+              <div id="m-sales-note" class="metric__note">—</div>
+            </div>
+          </div>
+
+          <div class="cta">
+            <button id="btn-cta" class="btn primary">Se rekommenderad setup</button>
+            <button id="btn-restart" class="btn ghost">Gör om</button>
+          </div>
+
+          <div class="fine">
+            <details>
+              <summary>Visa rådata (debug)</summary>
+              <pre id="debug"></pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Byggd för lärande: GA4 + GTM + dataanalys.</span>
+    </footer>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

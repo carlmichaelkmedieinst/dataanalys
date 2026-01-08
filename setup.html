@@ -1,0 +1,262 @@
+<!-- setup.html -->
+<!doctype html>
+<html lang="sv">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rekommenderad setup</title>
+  <meta name="description" content="Rekommenderad Marketing Automation-setup baserat på ditt quiz-resultat." />
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- GTM: Klistra in din GTM-container här när du är redo -->
+  <script>
+    window.dataLayer = window.dataLayer || [];
+  </script>
+</head>
+
+<body>
+  <main class="wrap">
+    <header class="header">
+      <div class="badge">Setup</div>
+      <h1>Din rekommenderade setup</h1>
+      <p class="sub" id="subtitle">Laddar…</p>
+    </header>
+
+    <section class="card">
+      <div class="screen">
+        <div class="result">
+          <div id="stack-badge" class="result__badge">Stack</div>
+          <h2 id="stack-title" class="result__title">—</h2>
+          <p id="stack-summary" class="result__summary">—</p>
+
+          <div class="result__grid">
+            <div class="metric">
+              <div class="metric__label">Målbild</div>
+              <div id="goal" class="metric__value">—</div>
+              <div id="goal-note" class="metric__note">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric__label">Risk om du överbygger</div>
+              <div id="risk" class="metric__value">—</div>
+              <div id="risk-note" class="metric__note">—</div>
+            </div>
+            <div class="metric">
+              <div class="metric__label">Nästa 7 dagar</div>
+              <div id="next" class="metric__value">—</div>
+              <div id="next-note" class="metric__note">—</div>
+            </div>
+          </div>
+
+          <h3 style="margin: 18px 0 8px;">Rekommenderade byggblock</h3>
+          <div id="modules" class="answers" aria-label="Setup-moduler">
+            <!-- Cards renderas via JS -->
+          </div>
+
+          <div class="nav" style="margin-top: 16px;">
+            <a class="btn ghost" href="index.html" id="back-to-quiz">Tillbaka till quiz</a>
+            <button class="btn primary" id="btn-outbound" type="button">Öppna verktygsrekommendationer</button>
+          </div>
+
+          <div class="fine">
+            <details>
+              <summary>Visa debug</summary>
+              <pre id="debug"></pre>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <span>Tips: Spåra scroll och modul-klick för att se vad som driver intent.</span>
+    </footer>
+  </main>
+
+  <script>
+    // setup.html inline script (håll det enkelt och i en fil)
+    window.dataLayer = window.dataLayer || [];
+    const dlPush = (event, params = {}) => {
+      const payload = { event, ...params, ts: Date.now(), page_path: location.pathname };
+      window.dataLayer.push(payload);
+      console.log("[dataLayer.push]", payload);
+    };
+
+    const STACK_CONTENT = {
+      starter: {
+        badge: "Starter",
+        title: "Starter stack",
+        summary:
+          "Snabb effekt utan att bygga skuld. Du behöver enkel automation, bra segmentering och stabil tracking.",
+        goal: ["Få ordning snabbt", "Bygg minsta möjliga system som går att skala senare."],
+        risk: ["Verktygssprawl", "Att köpa för tungt innan process/data sitter."],
+        next: ["Instrumentera events", "Bygg 1–2 nurturing-flöden och mät impact."],
+        modules: [
+          { id: "ma_tool", title: "MA-verktyg (lätt)", text: "ActiveCampaign/liknande för e-post, segment och enkla flöden." },
+          { id: "tracking", title: "GA4 + GTM", text: "Ren event-taxonomi: start, svar, completion, CTA. Inga 'random events'." },
+          { id: "forms", title: "Forms + consent", text: "Standardisera formulär, samtycke, och fältstruktur." },
+          { id: "dashboard", title: "Enkel dashboard", text: "Looker Studio: funnel + drop-off + CTA-rate." },
+        ],
+        outbound: [
+          { id: "hubspot", label: "Kolla HubSpot (för senare)" },
+          { id: "activecampaign", label: "Kolla ActiveCampaign" },
+        ],
+      },
+
+      growth_hubspot: {
+        badge: "Growth",
+        title: "Growth stack (HubSpot)",
+        summary:
+          "Ni är redo för en all-in-one där CRM och automation hänger ihop. Fokus: lifecycle stages, scoring, och segment.",
+        goal: ["Sätt systemet", "Knyt marknad + sälj runt samma data."],
+        risk: ["Att implementera utan governance", "Att låta allt bli ‘kampanj’ istället för system."],
+        next: ["Definiera lifecycle", "Implementera lead scoring + 2 nurture-spår."],
+        modules: [
+          { id: "crm", title: "CRM som källa till sanning", text: "Stages, ägarskap, obligatoriska fält, naming conventions." },
+          { id: "automation", title: "Nurturing + scoring", text: "Triggers, content-map, scoring (implicit/explicit)." },
+          { id: "tracking", title: "GA4 eventmodell", text: "Funnel events + kvalitetsmått (time to complete, drop-off)." },
+          { id: "ops", title: "Ops-rutiner", text: "Veckovis QA: dubbletter, bounce, consent, broken flows." },
+        ],
+        outbound: [
+          { id: "hubspot", label: "Kolla HubSpot" },
+          { id: "ga4", label: "GA4 event guidelines" },
+        ],
+      },
+
+      scale_revops: {
+        badge: "Scale",
+        title: "Scale stack (RevOps)",
+        summary:
+          "Ni behöver orkestrering mellan marknad och sälj. Fokus: integrationer, governance och rapportering som styr beslut.",
+        goal: ["Skala utan kaos", "Mätbar pipeline påverkan, inte bara leads."],
+        risk: ["Datakaos via integrationer", "Att måtta fel och bygga för mycket för tidigt."],
+        next: ["Datamodell + definitions", "Sätt reporting loop: insight → action."],
+        modules: [
+          { id: "governance", title: "Governance", text: "Data owners, fältpolicy, naming, change management." },
+          { id: "integrations", title: "Integrationer", text: "CRM ↔ MA ↔ support/billing ↔ BI. Mappa fält, logga fel." },
+          { id: "scoring", title: "Advanced scoring", text: "Segmentbaserad scoring + SLA mellan marknad och sälj." },
+          { id: "bi", title: "BI-light", text: "Pipeline dashboards + attribution light (praktiskt, inte religiöst)." },
+        ],
+        outbound: [
+          { id: "hubspot_enterprise", label: "Kolla HubSpot Enterprise" },
+          { id: "pardot", label: "Kolla Pardot" },
+        ],
+      },
+
+      enterprise_light: {
+        badge: "Enterprise-light",
+        title: "Enterprise-light stack",
+        summary:
+          "Hög komplexitet och många system. Här är arkitektur och governance viktigare än kampanjer.",
+        goal: ["Styrbar arkitektur", "Datakvalitet och compliance i fokus."],
+        risk: ["Lång implementation", "Att drunkna i integrationer utan tydliga owners."],
+        next: ["Kartlägg system", "Definiera data contracts + consent flows."],
+        modules: [
+          { id: "architecture", title: "Arkitektur", text: "Källsystem, master data, synk, data contracts och ägarskap." },
+          { id: "iPaaS", title: "Integrationslager (iPaaS)", text: "Styr flöden, felhantering, monitorering." },
+          { id: "dwh", title: "Datalager/BI", text: "Samla events + CRM + produktdata för analys och styrning." },
+          { id: "compliance", title: "Compliance", text: "Consent, retention policy, rättigheter (GDPR) och loggning." },
+        ],
+        outbound: [
+          { id: "salesforce", label: "Kolla Salesforce" },
+          { id: "marketing_cloud", label: "Kolla Marketing Cloud" },
+        ],
+      },
+    };
+
+    const $ = (s) => document.querySelector(s);
+
+    function getStackFromUrlOrStorage() {
+      const params = new URLSearchParams(location.search);
+      const fromUrl = params.get("stack");
+      const fromStorage = localStorage.getItem("ma_quiz_last_result");
+      const stack = fromUrl || fromStorage || "starter";
+      return STACK_CONTENT[stack] ? stack : "starter";
+    }
+
+    function render() {
+      const stackKey = getStackFromUrlOrStorage();
+      const c = STACK_CONTENT[stackKey];
+
+      $("#subtitle").textContent = `Baserat på ditt quiz-resultat: ${c.title}`;
+      $("#stack-badge").textContent = c.badge;
+      $("#stack-title").textContent = c.title;
+      $("#stack-summary").textContent = c.summary;
+
+      $("#goal").textContent = c.goal[0];
+      $("#goal-note").textContent = c.goal[1];
+
+      $("#risk").textContent = c.risk[0];
+      $("#risk-note").textContent = c.risk[1];
+
+      $("#next").textContent = c.next[0];
+      $("#next-note").textContent = c.next[1];
+
+      const modules = $("#modules");
+      modules.innerHTML = "";
+      c.modules.forEach((m) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "answer";
+        btn.dataset.moduleId = m.id;
+        btn.innerHTML = `<strong style="display:block; margin-bottom:6px;">${m.title}</strong><span style="color: var(--muted);">${m.text}</span>`;
+        btn.addEventListener("click", () => {
+          dlPush("setup_module_click", {
+            quiz_id: "ma_stack_quiz_v1",
+            stack: stackKey,
+            module_id: m.id,
+            module_title: m.title,
+          });
+          alert(`${m.title}\n\n${m.text}\n\n(Pro tip: gör detta till en riktig accordion/modals senare.)`);
+        });
+        modules.appendChild(btn);
+      });
+
+      $("#debug").textContent = JSON.stringify(
+        {
+          stack: stackKey,
+          source: new URLSearchParams(location.search).get("stack") ? "url" : (localStorage.getItem("ma_quiz_last_result") ? "localStorage" : "default"),
+          modules: c.modules.map(x => x.id),
+        },
+        null,
+        2
+      );
+
+      dlPush("setup_view", {
+        quiz_id: "ma_stack_quiz_v1",
+        stack: stackKey,
+        stack_title: c.title,
+      });
+
+      // Basic scroll tracking (utan GTM-triggers): när användaren scrollar 50% och 90%
+      let fired50 = false, fired90 = false;
+      window.addEventListener("scroll", () => {
+        const doc = document.documentElement;
+        const max = doc.scrollHeight - doc.clientHeight;
+        if (max <= 0) return;
+        const pct = (window.scrollY / max) * 100;
+
+        if (!fired50 && pct >= 50) {
+          fired50 = true;
+          dlPush("setup_scroll", { quiz_id: "ma_stack_quiz_v1", stack: stackKey, depth: 50 });
+        }
+        if (!fired90 && pct >= 90) {
+          fired90 = true;
+          dlPush("setup_scroll", { quiz_id: "ma_stack_quiz_v1", stack: stackKey, depth: 90 });
+        }
+      }, { passive: true });
+
+      // Outbound button (du kan byta till riktiga länkar senare)
+      $("#btn-outbound").addEventListener("click", () => {
+        dlPush("setup_outbound_click", {
+          quiz_id: "ma_stack_quiz_v1",
+          stack: stackKey,
+          outbound_targets: c.outbound.map(o => o.id).join(","),
+        });
+        alert(`Outbound: ${c.outbound.map(o => o.label).join(" • ")}`);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>

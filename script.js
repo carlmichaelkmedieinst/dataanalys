@@ -1,44 +1,50 @@
-// script.js
+// script.js (refactored: GA4-friendly naming convention)
 (() => {
   // ----------------------------
-  // 0) Helpers
+  // Helpers
   // ----------------------------
   const $ = (sel) => document.querySelector(sel);
 
-  // dataLayer helper (för GTM/GA4)
   window.dataLayer = window.dataLayer || [];
+  const QUIZ_ID = "ma_stack_quiz_v1";
+
   function dlPush(event, params = {}) {
     const payload = {
-      event,
+      event, // GTM custom event name
       ...params,
-      ts: Date.now(),
+      quiz_id: QUIZ_ID,
       page_path: location.pathname,
+      page_title: document.title,
+      ts: Date.now(),
     };
     window.dataLayer.push(payload);
-    // Debug: du kan kommentera bort när du kopplar GTM på riktigt
     console.log("[dataLayer.push]", payload);
   }
 
-  function clamp(n, min, max) {
-    return Math.max(min, Math.min(max, n));
-  }
-
   function bucketize(n, buckets) {
-    // buckets: array av {min,max,label}
     for (const b of buckets) {
       if (n >= b.min && n <= b.max) return b.label;
     }
     return "unknown";
   }
 
+  function getReturningHint() {
+    const last = localStorage.getItem("ma_quiz_last_completed_at");
+    if (!last) return "new";
+    const delta = Date.now() - Number(last);
+    if (delta < 24 * 60 * 60 * 1000) return "returning_1d";
+    if (delta < 7 * 24 * 60 * 60 * 1000) return "returning_7d";
+    return "returning_30d_plus";
+  }
+
   // ----------------------------
-  // 1) Quiz definition
-  // - Varje svar ger poäng i: complexity, data, sales
+  // Quiz definition
+  // - Each answer contributes to: complexity, data, sales
   // ----------------------------
   const QUESTIONS = [
     {
       id: "org_size",
-      dimension: "Organisation",
+      dimension: "organisation",
       title: "Hur ser er organisation ut idag?",
       help: "Storlek säger mycket om komplexitet och behov av struktur.",
       answers: [
@@ -50,7 +56,7 @@
     },
     {
       id: "sales_model",
-      dimension: "Go-to-market",
+      dimension: "go_to_market",
       title: "Hur genereras affärer främst?",
       help: "Olika säljmodell kräver olika typ av automation och integrationer.",
       answers: [
@@ -62,7 +68,7 @@
     },
     {
       id: "crm_state",
-      dimension: "CRM & data",
+      dimension: "crm_data",
       title: "Vilket påstående stämmer bäst om ert CRM?",
       help: "MA utan CRM/datadisciplin blir snabbt en dyr e-postmaskin.",
       answers: [
@@ -74,7 +80,7 @@
     },
     {
       id: "data_quality",
-      dimension: "Datamognad",
+      dimension: "data_maturity",
       title: "Hur bra koll har ni på datakvalitet?",
       help: "Datakvalitet avgör om personalisering och scoring blir magi eller kaos.",
       answers: [
@@ -86,7 +92,7 @@
     },
     {
       id: "content_state",
-      dimension: "Content",
+      dimension: "content",
       title: "Vilket beskriver ert content bäst?",
       help: "MA behöver bränsle. Utan content blir flöden snabbt tomma.",
       answers: [
@@ -98,7 +104,7 @@
     },
     {
       id: "channels",
-      dimension: "Kanaler",
+      dimension: "channels",
       title: "Vilka kanaler är viktigast för er idag?",
       help: "Fler kanaler ökar behov av orkestrering och konsistens.",
       answers: [
@@ -110,7 +116,7 @@
     },
     {
       id: "integration_need",
-      dimension: "Integrationer",
+      dimension: "integrations",
       title: "Hur mycket behöver ni integrera?",
       help: "Integrationer är ofta skillnaden mellan 'verktyg' och 'system'.",
       answers: [
@@ -122,7 +128,7 @@
     },
     {
       id: "growth_goal",
-      dimension: "Mål",
+      dimension: "goals",
       title: "Vad är ert fokus kommande 12 månader?",
       help: "Målet styr om du behöver ett lätt verktyg eller en hel RevOps-maskin.",
       answers: [
@@ -134,7 +140,7 @@
     },
     {
       id: "budget_band",
-      dimension: "Resurser",
+      dimension: "resources",
       title: "Hur ser budget/kapacitet för verktyg ut?",
       help: "Brutalt: enterprise-stack utan budget blir bara skuld.",
       answers: [
@@ -146,7 +152,7 @@
     },
     {
       id: "ops_owner",
-      dimension: "Ansvar",
+      dimension: "ownership",
       title: "Vem äger Marketing Ops i praktiken?",
       help: "Ägarskap avgör hur avancerat du kan bygga utan att det faller ihop.",
       answers: [
@@ -158,92 +164,61 @@
     },
   ];
 
-  // ----------------------------
-  // 2) Stack mapping
-  // ----------------------------
   const STACKS = [
-    {
-      key: "starter",
-      title: "Starter stack",
-      summary:
-        "Du behöver snabb effekt utan att bygga ett monster. Fokus: enkla flöden, bra segmentering och stabil tracking.",
-      setup: [
-        "ActiveCampaign (eller liknande lätt MA-verktyg)",
-        "GA4 + GTM (ren event taxonomi)",
-        "Enkel CRM-light eller pipeline (om sälj finns)",
-      ],
-    },
-    {
-      key: "growth_hubspot",
-      title: "Growth stack (HubSpot)",
-      summary:
-        "Ni är redo för en riktig all-in-one där CRM och automation sitter ihop. Fokus: lifecycle stages, lead scoring och tydliga nurturing-flöden.",
-      setup: [
-        "HubSpot (Starter/Pro beroende på behov)",
-        "Standardiserad datamodell (fält + ägarskap)",
-        "GA4 + GTM + grundläggande dashboarding",
-      ],
-    },
-    {
-      key: "scale_revops",
-      title: "Scale stack (RevOps)",
-      summary:
-        "Ni behöver orkestrering mellan marknad och sälj. Fokus: integrationsdisciplin, governance och rapportering som driver beslut.",
-      setup: [
-        "HubSpot Pro/Enterprise eller Pardot-liknande",
-        "CRM som källa till sanning + tydliga processer",
-        "BI-light (t.ex. Looker Studio) + datakvalitetsrutiner",
-      ],
-    },
-    {
-      key: "enterprise_light",
-      title: "Enterprise-light stack",
-      summary:
-        "Hög komplexitet och många system. Här handlar det mer om arkitektur än kampanjer: integrationer, datalager och governance.",
-      setup: [
-        "Salesforce + (Marketing Cloud/Pardot) beroende på upplägg",
-        "Integrationslager (t.ex. iPaaS) + tydliga data owners",
-        "BI/datalager och strikt samtyckeshantering",
-      ],
-    },
+    { key: "starter", title: "Starter stack" },
+    { key: "growth_hubspot", title: "Growth stack (HubSpot)" },
+    { key: "scale_revops", title: "Scale stack (RevOps)" },
+    { key: "enterprise_light", title: "Enterprise-light stack" },
   ];
 
   function pickStack(scores) {
-    // scores: {complexity, data, sales}
-    // Vi använder en enkel beslutsträd-ish logik (lätt att förstå och tweaka).
     const c = scores.complexity;
     const d = scores.data;
     const s = scores.sales;
-
-    // Justera trösklar om du vill. Nu är de rimliga för 10 frågor med 0-3 per svar.
     const total = c + d + s;
 
-    // Enterprise-light: hög total + hög complexity + hög data
     if (total >= 22 && c >= 8 && d >= 8) return STACKS.find(x => x.key === "enterprise_light");
-
-    // Scale/RevOps: hög total eller tydligt säljberoende + hög data
     if (total >= 16 || (s >= 10 && d >= 6)) return STACKS.find(x => x.key === "scale_revops");
-
-    // Growth/HubSpot: medel total och hyfsad data
     if (total >= 10 && d >= 4) return STACKS.find(x => x.key === "growth_hubspot");
-
-    // Annars: starter
     return STACKS.find(x => x.key === "starter");
   }
 
+  function computeScores(answers) {
+    const scores = { complexity: 0, data: 0, sales: 0 };
+    for (const q of QUESTIONS) {
+      const aid = answers[q.id];
+      const ans = q.answers.find(a => a.id === aid);
+      if (!ans) continue;
+      scores.complexity += ans.score.complexity;
+      scores.data += ans.score.data;
+      scores.sales += ans.score.sales;
+    }
+    return scores;
+  }
+
+  function scoreLabel(score) {
+    const buckets = [
+      { min: 0, max: 7, label: "low" },
+      { min: 8, max: 15, label: "medium" },
+      { min: 16, max: 23, label: "high" },
+      { min: 24, max: 30, label: "very_high" },
+    ];
+    return bucketize(score, buckets);
+  }
+
   // ----------------------------
-  // 3) State
+  // State
   // ----------------------------
   const state = {
-    startedAt: null,
-    currentIndex: 0,
-    answers: {}, // {questionId: answerId}
-    perQuestionTime: {}, // {questionId: ms}
-    questionEnterAt: null,
+    started_at: null,
+    current_index: 0,
+    answers: {},               // { question_id: answer_id }
+    per_question_time_ms: {},  // { question_id: ms }
+    question_enter_at: null,
   };
 
   // ----------------------------
-  // 4) DOM refs
+  // DOM refs
   // ----------------------------
   const screenIntro = $("#screen-intro");
   const screenQuiz = $("#screen-quiz");
@@ -263,7 +238,6 @@
   const progressText = $("#progress-text");
   const stateHint = $("#state-hint");
 
-  const resultBadge = $("#result-badge");
   const resultTitle = $("#result-title");
   const resultSummary = $("#result-summary");
   const btnCTA = $("#btn-cta");
@@ -278,22 +252,20 @@
   const mSalesNote = $("#m-sales-note");
 
   // ----------------------------
-  // 5) Render functions
+  // UI helpers
   // ----------------------------
   function showScreen(which) {
     screenIntro.classList.add("hidden");
     screenQuiz.classList.add("hidden");
     screenResult.classList.add("hidden");
-
     which.classList.remove("hidden");
   }
 
   function renderQuestion() {
-    const idx = state.currentIndex;
+    const idx = state.current_index;
     const q = QUESTIONS[idx];
 
-    // Time tracking (enter question)
-    state.questionEnterAt = Date.now();
+    state.question_enter_at = Date.now();
 
     // UI
     qTag.textContent = `Dimension: ${q.dimension}`;
@@ -304,9 +276,9 @@
     const total = QUESTIONS.length;
     const current = idx + 1;
     progressText.textContent = `Fråga ${current} av ${total}`;
-    const pct = Math.round((idx / total) * 100); // 0% vid första
+    const pct = Math.round((idx / total) * 100);
     progressBar.style.width = `${pct}%`;
-    $(".progress").setAttribute("aria-valuenow", String(current));
+    $(".progress")?.setAttribute("aria-valuenow", String(current));
 
     // Answers
     answersEl.innerHTML = "";
@@ -323,18 +295,19 @@
       answersEl.appendChild(btn);
     });
 
-    // Nav states
+    // Nav
     btnBack.disabled = idx === 0;
     btnNext.disabled = !selectedId;
     stateHint.textContent = selectedId ? "Bra. Nästa." : "Välj ett svar för att gå vidare.";
 
-    // Tracking: question_view
-    dlPush("quiz_question_view", {
-      quiz_id: "ma_stack_quiz_v1",
+    // Tracking
+    dlPush("ma_quiz_question_view", {
       question_id: q.id,
-      question_index: idx + 1,
+      question_index: current,
+      question_count: total,
       dimension: q.dimension,
       has_previous_answer: Boolean(selectedId),
+      returning_user_hint: getReturningHint(),
     });
   }
 
@@ -342,170 +315,48 @@
     const btn = e.currentTarget;
     const qid = btn.dataset.questionId;
     const aid = btn.dataset.answerId;
-    const idx = state.currentIndex;
 
-    // Measure time on question
-    const t = Date.now() - (state.questionEnterAt || Date.now());
-    state.perQuestionTime[qid] = (state.perQuestionTime[qid] || 0) + t;
-    state.questionEnterAt = Date.now(); // reset, so extra changes count too
+    const idx = state.current_index;
+    const q = QUESTIONS[idx];
 
-    // Save answer
+    // time spent since entering question (or last selection)
+    const t = Date.now() - (state.question_enter_at || Date.now());
+    state.per_question_time_ms[qid] = (state.per_question_time_ms[qid] || 0) + t;
+    state.question_enter_at = Date.now();
+
     state.answers[qid] = aid;
 
-    // UI: mark selected
     [...answersEl.querySelectorAll(".answer")].forEach((b) => {
       b.classList.toggle("selected", b.dataset.answerId === aid);
     });
+
     btnNext.disabled = false;
     stateHint.textContent = "Bra. Nästa.";
 
-    // Tracking: answer
-    dlPush("quiz_answer", {
-      quiz_id: "ma_stack_quiz_v1",
+    dlPush("ma_quiz_answer_select", {
       question_id: qid,
       question_index: idx + 1,
+      dimension: q.dimension,
       answer_id: aid,
       answer_text: btn.textContent,
       time_spent_ms: t,
     });
   }
 
-  function computeScores() {
-    const scores = { complexity: 0, data: 0, sales: 0 };
-
-    for (const q of QUESTIONS) {
-      const aid = state.answers[q.id];
-      const ans = q.answers.find(a => a.id === aid);
-      if (!ans) continue;
-      scores.complexity += ans.score.complexity;
-      scores.data += ans.score.data;
-      scores.sales += ans.score.sales;
-    }
-    return scores;
-  }
-
-  function scoreLabel(score) {
-    // Max per axis ~ 10 frågor * 3 = 30
-    const buckets = [
-      { min: 0, max: 7, label: "Låg" },
-      { min: 8, max: 15, label: "Medel" },
-      { min: 16, max: 23, label: "Hög" },
-      { min: 24, max: 30, label: "Mycket hög" },
-    ];
-    return bucketize(score, buckets);
-  }
-
-  function renderResult() {
-    const scores = computeScores();
-    const chosen = pickStack(scores);
-
-    const startedAt = state.startedAt || Date.now();
-    const durationMs = Date.now() - startedAt;
-
-    const cLabel = scoreLabel(scores.complexity);
-    const dLabel = scoreLabel(scores.data);
-    const sLabel = scoreLabel(scores.sales);
-
-    resultBadge.textContent = "Din rekommenderade stack";
-    resultTitle.textContent = chosen.title;
-    resultSummary.textContent = chosen.summary;
-
-    mComplexity.textContent = cLabel;
-    mData.textContent = dLabel;
-    mSales.textContent = sLabel;
-
-    mComplexityNote.textContent = `Poäng: ${scores.complexity} / 30`;
-    mDataNote.textContent = `Poäng: ${scores.data} / 30`;
-    mSalesNote.textContent = `Poäng: ${scores.sales} / 30`;
-
-    // CTA text kan ändras baserat på stack
-    btnCTA.textContent = "Se rekommenderad setup";
-
-    const debug = {
-      quiz_id: "ma_stack_quiz_v1",
-      started_at: startedAt,
-      duration_ms: durationMs,
-      scores,
-      result_stack: chosen.key,
-      answers: state.answers,
-      per_question_time_ms: state.perQuestionTime,
-      returning_user_hint: getReturningHint(),
-      recommended_setup: chosen.setup,
-    };
-    debugEl.textContent = JSON.stringify(debug, null, 2);
-
-    // Persist a tiny bit for returning-user experiments (inte PII)
-    localStorage.setItem("ma_quiz_last_result", chosen.key);
-    localStorage.setItem("ma_quiz_last_completed_at", String(Date.now()));
-
-    // Tracking: complete
-    dlPush("quiz_complete", {
-      quiz_id: "ma_stack_quiz_v1",
-      result_stack: chosen.key,
-      duration_ms: durationMs,
-      complexity_score: scores.complexity,
-      data_score: scores.data,
-      sales_score: scores.sales,
-      complexity_bucket: cLabel,
-      data_bucket: dLabel,
-      sales_bucket: sLabel,
-      answers_count: Object.keys(state.answers).length,
-      returning_user_hint: getReturningHint(),
-    });
-  }
-
-  function getReturningHint() {
-    const last = localStorage.getItem("ma_quiz_last_completed_at");
-    if (!last) return "new";
-    const delta = Date.now() - Number(last);
-    if (delta < 24 * 60 * 60 * 1000) return "returning_1d";
-    if (delta < 7 * 24 * 60 * 60 * 1000) return "returning_7d";
-    return "returning_30d_plus";
-  }
-
-  // ----------------------------
-  // 6) Flow control
-  // ----------------------------
-  function startQuiz({ demoFill = false } = {}) {
-    state.startedAt = Date.now();
-    state.currentIndex = 0;
-    state.answers = {};
-    state.perQuestionTime = {};
-    state.questionEnterAt = null;
-
-    showScreen(screenQuiz);
-
-    dlPush("quiz_start", {
-      quiz_id: "ma_stack_quiz_v1",
-      returning_user_hint: getReturningHint(),
-      demo_fill: demoFill,
-    });
-
-    if (demoFill) {
-      // random answers to let you test analytics quickly
-      for (const q of QUESTIONS) {
-        const pick = q.answers[Math.floor(Math.random() * q.answers.length)];
-        state.answers[q.id] = pick.id;
-      }
-      // Jump to result
-      showResult();
-      return;
-    }
-
-    renderQuestion();
+  function closeQuestionTime() {
+    const q = QUESTIONS[state.current_index];
+    const t = Date.now() - (state.question_enter_at || Date.now());
+    state.per_question_time_ms[q.id] = (state.per_question_time_ms[q.id] || 0) + t;
   }
 
   function nextQuestion() {
-    const q = QUESTIONS[state.currentIndex];
-    const hasAnswer = Boolean(state.answers[q.id]);
-    if (!hasAnswer) return;
+    const q = QUESTIONS[state.current_index];
+    if (!state.answers[q.id]) return;
 
-    // close time on current question
-    const t = Date.now() - (state.questionEnterAt || Date.now());
-    state.perQuestionTime[q.id] = (state.perQuestionTime[q.id] || 0) + t;
+    closeQuestionTime();
 
-    if (state.currentIndex < QUESTIONS.length - 1) {
-      state.currentIndex += 1;
+    if (state.current_index < QUESTIONS.length - 1) {
+      state.current_index += 1;
       renderQuestion();
     } else {
       showResult();
@@ -513,17 +364,13 @@
   }
 
   function prevQuestion() {
-    if (state.currentIndex === 0) return;
+    if (state.current_index === 0) return;
 
-    const q = QUESTIONS[state.currentIndex];
-    const t = Date.now() - (state.questionEnterAt || Date.now());
-    state.perQuestionTime[q.id] = (state.perQuestionTime[q.id] || 0) + t;
+    closeQuestionTime();
+    state.current_index -= 1;
 
-    state.currentIndex -= 1;
-
-    dlPush("quiz_back", {
-      quiz_id: "ma_stack_quiz_v1",
-      to_question_index: state.currentIndex + 1,
+    dlPush("ma_quiz_back", {
+      to_question_index: state.current_index + 1,
     });
 
     renderQuestion();
@@ -531,39 +378,112 @@
 
   function showResult() {
     showScreen(screenResult);
-
-    // Fill progress to 100
     progressBar.style.width = `100%`;
 
-    renderResult();
+    const scores = computeScores(state.answers);
+    const chosen = pickStack(scores);
+
+    const duration_ms = Date.now() - (state.started_at || Date.now());
+
+    const complexity_bucket = scoreLabel(scores.complexity);
+    const data_bucket = scoreLabel(scores.data);
+    const sales_bucket = scoreLabel(scores.sales);
+
+    resultTitle.textContent = chosen.title;
+    resultSummary.textContent =
+      "Din rekommendation baseras på komplexitet, datamognad och säljberoende. Klicka vidare för en tydlig landing page per stack.";
+
+    mComplexity.textContent = complexity_bucket;
+    mData.textContent = data_bucket;
+    mSales.textContent = sales_bucket;
+
+    mComplexityNote.textContent = `Poäng: ${scores.complexity} / 30`;
+    mDataNote.textContent = `Poäng: ${scores.data} / 30`;
+    mSalesNote.textContent = `Poäng: ${scores.sales} / 30`;
+
+    // persist (non-PII)
+    localStorage.setItem("ma_quiz_last_result", chosen.key);
+    localStorage.setItem("ma_quiz_last_completed_at", String(Date.now()));
+
+    const debug = {
+      quiz_id: QUIZ_ID,
+      started_at: state.started_at,
+      duration_ms,
+      scores,
+      buckets: { complexity_bucket, data_bucket, sales_bucket },
+      result_stack: chosen.key,
+      answers: state.answers,
+      per_question_time_ms: state.per_question_time_ms,
+      returning_user_hint: getReturningHint(),
+    };
+    debugEl.textContent = JSON.stringify(debug, null, 2);
+
+    dlPush("ma_quiz_complete", {
+      duration_ms,
+      answers_count: Object.keys(state.answers).length,
+      result_stack: chosen.key,
+      complexity_score: scores.complexity,
+      data_score: scores.data,
+      sales_score: scores.sales,
+      complexity_bucket,
+      data_bucket,
+      sales_bucket,
+      returning_user_hint: getReturningHint(),
+    });
+
+    // cache chosen for CTA
+    btnCTA.dataset.resultStack = chosen.key;
+  }
+
+  function startQuiz({ demo_fill = false } = {}) {
+    state.started_at = Date.now();
+    state.current_index = 0;
+    state.answers = {};
+    state.per_question_time_ms = {};
+    state.question_enter_at = null;
+
+    showScreen(screenQuiz);
+
+    dlPush("ma_quiz_start", {
+      demo_fill,
+      returning_user_hint: getReturningHint(),
+      question_count: QUESTIONS.length,
+    });
+
+    if (demo_fill) {
+      // random answers to stress-test tracking & analysis
+      for (const q of QUESTIONS) {
+        const pick = q.answers[Math.floor(Math.random() * q.answers.length)];
+        state.answers[q.id] = pick.id;
+      }
+      showResult();
+      return;
+    }
+
+    renderQuestion();
   }
 
   function restart() {
-    dlPush("quiz_restart", { quiz_id: "ma_stack_quiz_v1" });
+    dlPush("ma_quiz_restart", { returning_user_hint: getReturningHint() });
     showScreen(screenIntro);
   }
 
-  // CTA click: här kan du välja att navigera till en ny sida, öppna modal, etc.
-function onCTA() {
-  const scores = computeScores();
-  const chosen = pickStack(scores);
+  function onCTA() {
+    const result_stack = btnCTA.dataset.resultStack || localStorage.getItem("ma_quiz_last_result") || "starter";
 
-  dlPush("result_cta_click", {
-    quiz_id: "ma_stack_quiz_v1",
-    cta_type: "recommended_setup",
-    result_stack: chosen.key,
-  });
+    dlPush("ma_quiz_result_cta_click", {
+      cta_type: "recommended_setup",
+      result_stack,
+    });
 
-  // Navigera till setup-sidan och skicka med stack i URL
-  window.location.href = `setup.html?stack=${encodeURIComponent(chosen.key)}`;
-}
-
+    window.location.href = `setup.html?stack=${encodeURIComponent(result_stack)}`;
+  }
 
   // ----------------------------
-  // 7) Wire up
+  // Wire up
   // ----------------------------
-  btnStart.addEventListener("click", () => startQuiz({ demoFill: false }));
-  btnDemoFill.addEventListener("click", () => startQuiz({ demoFill: true }));
+  btnStart.addEventListener("click", () => startQuiz({ demo_fill: false }));
+  btnDemoFill.addEventListener("click", () => startQuiz({ demo_fill: true }));
   btnNext.addEventListener("click", nextQuestion);
   btnBack.addEventListener("click", prevQuestion);
   btnRestart.addEventListener("click", restart);
@@ -572,9 +492,8 @@ function onCTA() {
   // Initial screen
   showScreen(screenIntro);
 
-  // Optional: track page_view hint (GTM usually does this; men här är en ren signal)
-  dlPush("page_loaded", {
-    quiz_id: "ma_stack_quiz_v1",
+  // Optional light page view signal
+  dlPush("ma_page_view", {
     returning_user_hint: getReturningHint(),
   });
 })();

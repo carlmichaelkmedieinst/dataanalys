@@ -120,10 +120,10 @@ const STACK_CONTENT = {
     ],
     modules: [
       { title: "Enkel MA-plattform", text: "E-post, segment och grundläggande automation." },
-      { title: "Spårning & mätning", text: "Event-baserad mätning av intent." },
+      { title: "Spårning & mätning", text: "Event-baserad mätning av intent och konvertering." },
       { title: "Formulär & consent", text: "Tydlig struktur för leads och GDPR." }
     ],
-    tools: ["ActiveCampaign", "HubSpot", "Google Analytics", "Google Tag Manager"]
+    tools: ["ActiveCampaign", "HubSpot (Starter)", "GA4", "GTM"]
   },
 
   growth_hubspot: {
@@ -132,19 +132,19 @@ const STACK_CONTENT = {
     summary: "En sammanhållen setup där CRM och Marketing Automation arbetar som ett system.",
     goal: ["Skapa struktur", "Synka marknad och sälj"],
     risk: ["Implementera utan governance", "Bli kampanjdriven"],
-    next: ["Lifecycle-struktur", "Lead scoring"],
+    next: ["Lifecycle-struktur", "Lead scoring + nurture"],
     plan: [
       { day: "Dag 1", do: "Definiera lifecycle-steg och kriterier.", outcome: "Gemensamt språk." },
-      { day: "Dag 2", do: "Städa CRM-minimum (fält, ägarskap).", outcome: "Stabil databas." },
-      { day: "Dag 3", do: "Inför lead scoring.", outcome: "Prioriterade leads." },
-      { day: "Dag 4", do: "Bygg två nurture-spår.", outcome: "Systematisk rörelse mot affär." },
+      { day: "Dag 2", do: "Städa CRM-minimum (fält, ägarskap, dubbletter).", outcome: "Stabil databas." },
+      { day: "Dag 3", do: "Inför lead scoring (minimalt).", outcome: "Prioriterade leads." },
+      { day: "Dag 4", do: "Bygg två nurture-spår (utbildande + köpnära).", outcome: "Systematisk rörelse mot affär." },
       { day: "Dag 5", do: "Definiera SLA mellan marknad och sälj.", outcome: "Tydligt ansvar." },
-      { day: "Dag 6", do: "Sätt pipeline-översikt.", outcome: "Synlig affärseffekt." },
-      { day: "Dag 7", do: "Inför veckovis QA-rutin.", outcome: "Systemet håller över tid." }
+      { day: "Dag 6", do: "Sätt pipeline-översikt (MQL→SQL→Won).", outcome: "Synlig affärseffekt." },
+      { day: "Dag 7", do: "Inför veckovis QA-rutin (flows, consent, leveransbarhet).", outcome: "Systemet håller över tid." }
     ],
     modules: [
       { title: "CRM som källa till sanning", text: "Lifecycle, ägarskap och struktur." },
-      { title: "Nurturing & scoring", text: "Flytta leads systematiskt." },
+      { title: "Nurturing & scoring", text: "Flytta leads systematiskt och prioritera." },
       { title: "Ops-rutiner", text: "QA, consent, leveransbarhet." }
     ],
     tools: ["HubSpot", "GA4", "GTM", "Looker Studio"]
@@ -156,22 +156,46 @@ const STACK_CONTENT = {
     summary: "För organisationer som behöver orkestrera marknad och sälj över flera system.",
     goal: ["Skala kontrollerat", "Mät pipeline-påverkan"],
     risk: ["Integrationskaos", "Otydligt ägarskap"],
-    next: ["Datamodell", "Governance"],
+    next: ["Data contracts + governance", "SLA + pipeline-rapportering"],
     plan: [
-      { day: "Dag 1", do: "Kartlägg system och ägarskap.", outcome: "Klar ansvarsfördelning." },
-      { day: "Dag 2", do: "Definiera data- och integrationsregler.", outcome: "Mindre kaos." },
-      { day: "Dag 3", do: "Sätt monitorering på integrationer.", outcome: "Problem syns direkt." },
-      { day: "Dag 4", do: "Bygg SLA-logik för sälj.", outcome: "Styr beteende." },
-      { day: "Dag 5", do: "Segment-baserad scoring.", outcome: "Bättre prioritering." },
-      { day: "Dag 6", do: "Pipeline-dashboards.", outcome: "Datadrivna beslut." },
-      { day: "Dag 7", do: "Etablera insight → action-loop.", outcome: "Kontinuerlig förbättring." }
+      { day: "Dag 1", do: "Kartlägg system och ägarskap (CRM, MA, webb, support/billing, BI).", outcome: "Klar ansvarsfördelning." },
+      { day: "Dag 2", do: "Definiera data- och integrationsregler (fält, riktning, naming).", outcome: "Mindre kaos." },
+      { day: "Dag 3", do: "Sätt monitorering på integrationer (fel, latency, retries).", outcome: "Problem syns direkt." },
+      { day: "Dag 4", do: "Bygg SLA-logik för sälj (time-to-first-touch).", outcome: "Styr beteende med data." },
+      { day: "Dag 5", do: "Segment-baserad scoring (inte one-size-fits-all).", outcome: "Bättre prioritering." },
+      { day: "Dag 6", do: "Pipeline-dashboards (velocity, stage drop-off).", outcome: "Datadrivna beslut." },
+      { day: "Dag 7", do: "Etablera insight → action-loop (1 insikt → 1 ändring → mätning).", outcome: "Kontinuerlig förbättring." }
     ],
     modules: [
-      { title: "Governance", text: "Ägarskap och standarder." },
-      { title: "Integrationer", text: "Styrda och övervakade flöden." },
-      { title: "BI & rapportering", text: "Pipeline och velocity." }
+      { title: "Governance", text: "Ägarskap och standarder för data och process." },
+      { title: "Integrationer", text: "Styrda och övervakade flöden mellan system." },
+      { title: "BI & rapportering", text: "Pipeline och velocity som styr beslut." }
     ],
-    tools: ["HubSpot", "Salesforce", "GA4", "GTM"]
+    tools: ["HubSpot / Salesforce", "GA4", "GTM", "Looker Studio"]
+  },
+
+  enterprise_light: {
+    badge: "Enterprise-light",
+    title: "Enterprise-light stack",
+    summary: "För hög komplexitet och många system. Här vinner du på arkitektur, governance och compliance före “fler kampanjer”.",
+    goal: ["Styrbar arkitektur", "Datakvalitet + compliance först"],
+    risk: ["Lång implementation", "Datadrift och incidenter utan owners"],
+    next: ["Systeminventering + governance", "Stabil identitet/consent + integrationsdisciplin"],
+    plan: [
+      { day: "Dag 1", do: "Inventera system: källor, master data, identity, consent-flöden.", outcome: "Ni vet vad som är möjligt och var riskerna finns." },
+      { day: "Dag 2", do: "Definiera governance: data owners, change process, standarder (fält/naming).", outcome: "Ni får kontroll när många team är inblandade." },
+      { day: "Dag 3", do: "Designa integrationsprinciper: sync-riktning, felhantering, monitorering.", outcome: "Systemet blir driftbart." },
+      { day: "Dag 4", do: "Definiera compliance: retention, rättigheter, loggning, audit-spår.", outcome: "Ni kan skala utan GDPR-smäll." },
+      { day: "Dag 5", do: "Sätt core event-modell + datamodell (minimalt men stabilt).", outcome: "Gemensam mätbarhet över system." },
+      { day: "Dag 6", do: "Bygg BI core dashboards (pipeline + adoption + datakvalitet).", outcome: "Ni styr med signal, inte magkänsla." },
+      { day: "Dag 7", do: "Etablera drift/QA-rutin: monitorering, incidentprocess, ansvar per område.", outcome: "Ni stoppar datakvalitet från att erodera." }
+    ],
+    modules: [
+      { title: "Arkitektur & master data", text: "Definiera källor, identitet och principer." },
+      { title: "Integrationer + monitorering", text: "Spårbarhet, felhantering, driftbarhet." },
+      { title: "Compliance", text: "Consent, retention, audit." }
+    ],
+    tools: ["Salesforce", "Marketing Cloud / Account Engagement", "GA4", "GTM", "BI/warehouse (valfritt)"]
   }
 };
 
@@ -179,8 +203,12 @@ const STACK_CONTENT = {
    Render
 -------------------------------------------------- */
 const params = new URLSearchParams(location.search);
-const stackKey = params.get("stack") || "starter";
+const stackKey = params.get("stack") || localStorage.getItem("ma_quiz_last_result") || "starter";
+
+// Här: om stackKey inte finns, defaulta. (Bra failsafe)
 const c = STACK_CONTENT[stackKey] || STACK_CONTENT.starter;
+
+document.getElementById("subtitle").textContent = `Baserat på ditt quiz-resultat: ${c.title}`;
 
 document.getElementById("stack-badge").textContent = c.badge;
 document.getElementById("stack-title").textContent = c.title;
@@ -194,28 +222,37 @@ document.getElementById("next").textContent = c.next[0];
 document.getElementById("next-note").textContent = c.next[1];
 
 const planEl = document.getElementById("plan-steps");
+planEl.innerHTML = "";
 c.plan.forEach(p => {
   const li = document.createElement("li");
-  li.innerHTML = `<strong>${p.day}</strong>: ${p.do}<br><span class="steps__outcome">${p.outcome}</span>`;
+  li.className = "steps__item";
+  li.innerHTML = `
+    <div class="steps__day">${p.day}</div>
+    <div class="steps__do">${p.do}</div>
+    <div class="steps__outcome">${p.outcome}</div>
+  `;
   planEl.appendChild(li);
 });
 
 const moduleEl = document.getElementById("module-list");
+moduleEl.innerHTML = "";
 c.modules.forEach(m => {
   const div = document.createElement("div");
   div.className = "accordion__item";
-  div.innerHTML = `<strong>${m.title}</strong><p>${m.text}</p>`;
+  div.innerHTML = `<div style="padding:12px;"><strong>${m.title}</strong><p class="fine" style="margin:6px 0 0;">${m.text}</p></div>`;
   moduleEl.appendChild(div);
 });
 
 const toolEl = document.getElementById("tool-links");
+toolEl.innerHTML = "";
 c.tools.forEach(t => {
   const div = document.createElement("div");
   div.className = "tool";
-  div.textContent = t;
+  div.innerHTML = `<div class="tool__label">${t}</div><div class="tool__meta">Rekommenderat exempel</div>`;
   toolEl.appendChild(div);
 });
 
+// Tracking
 dlPush("ma_setup_view", { stack: stackKey });
 </script>
 </body>

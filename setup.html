@@ -70,13 +70,13 @@
       <section class="section" id="tools">
         <h3 class="section__title">Verktyg som passar din situation</h3>
         <p class="section__sub">
-          Exempel på verktyg som matchar rekommendationen. Välj utifrån budget, team och ambition.
+          Exempel på verktyg som matchar rekommendationen. Klick till verktyg är en tydlig proxy för intent.
         </p>
         <div id="tool-links" class="tools"></div>
       </section>
 
       <div class="cta-row">
-        <a class="btn ghost" href="index.html">Gör quizet igen</a>
+        <a class="btn ghost" href="index.html" id="back-to-quiz">Gör quizet igen</a>
       </div>
 
     </div>
@@ -88,20 +88,25 @@
 /* --------------------------------------------------
    dataLayer helper
 -------------------------------------------------- */
+window.dataLayer = window.dataLayer || [];
+
 const dlPush = (event, params = {}) => {
   window.dataLayer.push({
     event,
     ...params,
     page_path: location.pathname,
+    page_title: document.title,
     ts: Date.now()
   });
 };
 
+const $ = (sel) => document.querySelector(sel);
+
 /* --------------------------------------------------
-   Stack content (EXTERNAL user plans only)
+   Stack content (EXTERNAL implementation plans)
+   - tools are real links (outbound tracking)
 -------------------------------------------------- */
 const STACK_CONTENT = {
-
   starter: {
     badge: "Starter",
     title: "Starter stack",
@@ -123,7 +128,13 @@ const STACK_CONTENT = {
       { title: "Spårning & mätning", text: "Event-baserad mätning av intent och konvertering." },
       { title: "Formulär & consent", text: "Tydlig struktur för leads och GDPR." }
     ],
-    tools: ["ActiveCampaign", "HubSpot (Starter)", "GA4", "GTM"]
+    tools: [
+      { id: "activecampaign", label: "ActiveCampaign", href: "https://www.activecampaign.com/" },
+      { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
+      { id: "ga4", label: "Google Analytics (GA4)", href: "https://analytics.google.com/" },
+      { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
+      { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" }
+    ]
   },
 
   growth_hubspot: {
@@ -147,7 +158,12 @@ const STACK_CONTENT = {
       { title: "Nurturing & scoring", text: "Flytta leads systematiskt och prioritera." },
       { title: "Ops-rutiner", text: "QA, consent, leveransbarhet." }
     ],
-    tools: ["HubSpot", "GA4", "GTM", "Looker Studio"]
+    tools: [
+      { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
+      { id: "ga4", label: "Google Analytics (GA4)", href: "https://analytics.google.com/" },
+      { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
+      { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" }
+    ]
   },
 
   scale_revops: {
@@ -171,7 +187,13 @@ const STACK_CONTENT = {
       { title: "Integrationer", text: "Styrda och övervakade flöden mellan system." },
       { title: "BI & rapportering", text: "Pipeline och velocity som styr beslut." }
     ],
-    tools: ["HubSpot / Salesforce", "GA4", "GTM", "Looker Studio"]
+    tools: [
+      { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
+      { id: "salesforce", label: "Salesforce", href: "https://www.salesforce.com/" },
+      { id: "ga4", label: "Google Analytics (GA4)", href: "https://analytics.google.com/" },
+      { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
+      { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" }
+    ]
   },
 
   enterprise_light: {
@@ -195,7 +217,13 @@ const STACK_CONTENT = {
       { title: "Integrationer + monitorering", text: "Spårbarhet, felhantering, driftbarhet." },
       { title: "Compliance", text: "Consent, retention, audit." }
     ],
-    tools: ["Salesforce", "Marketing Cloud / Account Engagement", "GA4", "GTM", "BI/warehouse (valfritt)"]
+    tools: [
+      { id: "salesforce", label: "Salesforce", href: "https://www.salesforce.com/" },
+      { id: "marketing_cloud", label: "Salesforce Marketing Cloud", href: "https://www.salesforce.com/products/marketing-cloud/overview/" },
+      { id: "account_engagement", label: "Salesforce Account Engagement (Pardot)", href: "https://www.salesforce.com/products/marketing-cloud/account-engagement/" },
+      { id: "ga4", label: "Google Analytics (GA4)", href: "https://analytics.google.com/" },
+      { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" }
+    ]
   }
 };
 
@@ -204,26 +232,27 @@ const STACK_CONTENT = {
 -------------------------------------------------- */
 const params = new URLSearchParams(location.search);
 const stackKey = params.get("stack") || localStorage.getItem("ma_quiz_last_result") || "starter";
-
-// Här: om stackKey inte finns, defaulta. (Bra failsafe)
 const c = STACK_CONTENT[stackKey] || STACK_CONTENT.starter;
 
-document.getElementById("subtitle").textContent = `Baserat på ditt quiz-resultat: ${c.title}`;
+$("#subtitle").textContent = `Baserat på ditt quiz-resultat: ${c.title}`;
 
-document.getElementById("stack-badge").textContent = c.badge;
-document.getElementById("stack-title").textContent = c.title;
-document.getElementById("stack-summary").textContent = c.summary;
+$("#stack-badge").textContent = c.badge;
+$("#stack-title").textContent = c.title;
+$("#stack-summary").textContent = c.summary;
 
-document.getElementById("goal").textContent = c.goal[0];
-document.getElementById("goal-note").textContent = c.goal[1];
-document.getElementById("risk").textContent = c.risk[0];
-document.getElementById("risk-note").textContent = c.risk[1];
-document.getElementById("next").textContent = c.next[0];
-document.getElementById("next-note").textContent = c.next[1];
+$("#goal").textContent = c.goal[0];
+$("#goal-note").textContent = c.goal[1];
 
-const planEl = document.getElementById("plan-steps");
+$("#risk").textContent = c.risk[0];
+$("#risk-note").textContent = c.risk[1];
+
+$("#next").textContent = c.next[0];
+$("#next-note").textContent = c.next[1];
+
+// Plan
+const planEl = $("#plan-steps");
 planEl.innerHTML = "";
-c.plan.forEach(p => {
+c.plan.forEach((p) => {
   const li = document.createElement("li");
   li.className = "steps__item";
   li.innerHTML = `
@@ -234,26 +263,95 @@ c.plan.forEach(p => {
   planEl.appendChild(li);
 });
 
-const moduleEl = document.getElementById("module-list");
+// Modules
+const moduleEl = $("#module-list");
 moduleEl.innerHTML = "";
-c.modules.forEach(m => {
+c.modules.forEach((m) => {
   const div = document.createElement("div");
   div.className = "accordion__item";
   div.innerHTML = `<div style="padding:12px;"><strong>${m.title}</strong><p class="fine" style="margin:6px 0 0;">${m.text}</p></div>`;
   moduleEl.appendChild(div);
 });
 
-const toolEl = document.getElementById("tool-links");
+// Tools (real links + outbound tracking)
+const toolEl = $("#tool-links");
 toolEl.innerHTML = "";
-c.tools.forEach(t => {
-  const div = document.createElement("div");
-  div.className = "tool";
-  div.innerHTML = `<div class="tool__label">${t}</div><div class="tool__meta">Rekommenderat exempel</div>`;
-  toolEl.appendChild(div);
+c.tools.forEach((t, idx) => {
+  const a = document.createElement("a");
+  a.className = "tool";
+  a.href = t.href;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.innerHTML = `<div class="tool__label">${t.label}</div><div class="tool__meta">Öppnas i ny flik</div>`;
+  a.addEventListener("click", () => {
+    dlPush("ma_setup_outbound_click", {
+      stack: stackKey,
+      outbound_id: t.id,
+      outbound_index: idx + 1
+    });
+  });
+  toolEl.appendChild(a);
 });
 
-// Tracking
+// Tracking: setup view
 dlPush("ma_setup_view", { stack: stackKey });
+
+/* --------------------------------------------------
+   Scroll depth tracking (25/50/75/90) - once each
+-------------------------------------------------- */
+(function trackScrollDepth() {
+  const marks = [25, 50, 75, 90];
+  const fired = new Set();
+
+  window.addEventListener("scroll", () => {
+    const doc = document.documentElement;
+    const max = doc.scrollHeight - doc.clientHeight;
+    if (max <= 0) return;
+
+    const percent = Math.round((window.scrollY / max) * 100);
+    for (const m of marks) {
+      if (!fired.has(m) && percent >= m) {
+        fired.add(m);
+        dlPush("ma_setup_scroll_depth", { stack: stackKey, percent: m });
+      }
+    }
+  }, { passive: true });
+})();
+
+/* --------------------------------------------------
+   Section view tracking (plan/modules/tools) - once each
+   More precise than scroll % for "did they reach the last recommendations?"
+-------------------------------------------------- */
+(function trackSectionViews() {
+  const sectionIds = ["plan", "modules", "tools"];
+  const seen = new Set();
+
+  if (!("IntersectionObserver" in window)) {
+    // Fallback: if browser doesn't support, do nothing (avoid noisy approximations)
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && !seen.has(entry.target.id)) {
+          seen.add(entry.target.id);
+          dlPush("ma_setup_section_view", {
+            stack: stackKey,
+            section_id: entry.target.id
+          });
+        }
+      });
+    },
+    { threshold: 0.4 }
+  );
+
+  sectionIds.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) observer.observe(el);
+  });
+})();
 </script>
+
 </body>
 </html>

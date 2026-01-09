@@ -1,734 +1,222 @@
-<!-- setup.html (updated: diagnostics from last quiz payload + percent buckets + better copy) -->
 <!doctype html>
 <html lang="sv">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Rekommenderad setup</title>
-  <meta name="description" content="Rekommenderad Marketing Automation-setup baserat på ditt quiz-resultat." />
+  <title>Rekommenderad Marketing Automation-setup</title>
+  <meta name="description" content="Praktisk Marketing Automation-setup baserad på ditt quiz-resultat." />
   <link rel="stylesheet" href="style.css" />
-
-  <script>
-    window.dataLayer = window.dataLayer || [];
-  </script>
+  <script>window.dataLayer = window.dataLayer || [];</script>
 </head>
 
 <body>
-  <main class="wrap">
-    <header class="header">
-      <div class="badge">Setup Landing</div>
-      <h1>Din rekommenderade setup</h1>
-      <p class="sub" id="subtitle">Laddar…</p>
-    </header>
+<main class="wrap">
 
-    <section class="card">
-      <nav class="anchor-nav" aria-label="Sektioner">
-        <a class="anchor-nav__link" href="#overview" data-anchor="overview">Översikt</a>
-        <a class="anchor-nav__link" href="#diagnosis" data-anchor="diagnosis">Diagnos</a>
-        <a class="anchor-nav__link" href="#modules" data-anchor="modules">Byggblock</a>
-        <a class="anchor-nav__link" href="#plan" data-anchor="plan">7-dagarsplan</a>
-        <a class="anchor-nav__link" href="#tools" data-anchor="tools">Verktyg</a>
-      </nav>
+  <header class="header">
+    <div class="badge">Rekommendation</div>
+    <h1>Din rekommenderade setup</h1>
+    <p class="sub" id="subtitle">Baserat på ditt quiz-resultat</p>
+  </header>
 
-      <div class="screen">
-        <!-- OVERVIEW -->
-        <section id="overview" class="section">
-          <div class="result">
-            <div id="stack-badge" class="result__badge">Stack</div>
-            <h2 id="stack-title" class="result__title">—</h2>
-            <p id="stack-summary" class="result__summary">—</p>
+  <section class="card">
+    <div class="screen">
 
-            <div class="section__grid">
-              <div class="metric">
-                <div class="metric__label">Målbild</div>
-                <div id="goal" class="metric__value">—</div>
-                <div id="goal-note" class="metric__note">—</div>
-              </div>
-              <div class="metric">
-                <div class="metric__label">Risk om du överbygger</div>
-                <div id="risk" class="metric__value">—</div>
-                <div id="risk-note" class="metric__note">—</div>
-              </div>
-              <div class="metric">
-                <div class="metric__label">Nästa 7 dagar</div>
-                <div id="next" class="metric__value">—</div>
-                <div id="next-note" class="metric__note">—</div>
-              </div>
-            </div>
-
-            <div class="cta-row">
-              <a class="btn ghost" href="index.html" id="back-to-quiz">Tillbaka till quiz</a>
-              <a class="btn primary" href="#modules" id="jump-to-modules">Visa byggblock</a>
-            </div>
-
-            <p class="fine" id="overview-fine">
-              Det här är byggt för analys: scroll, ankarklick, modulinteraktioner och outbound-intent.
-            </p>
-          </div>
-        </section>
-
-        <!-- DIAGNOSIS -->
-        <section id="diagnosis" class="section">
-          <h3 class="section__title">Diagnos</h3>
-          <p class="section__sub" id="diagnosis-sub">
-            Laddar diagnostik…
-          </p>
+      <!-- OVERVIEW -->
+      <section class="section" id="overview">
+        <div class="result">
+          <div id="stack-badge" class="result__badge">Stack</div>
+          <h2 id="stack-title" class="result__title">—</h2>
+          <p id="stack-summary" class="result__summary">—</p>
 
           <div class="section__grid">
             <div class="metric">
-              <div class="metric__label">Komplexitet</div>
-              <div id="diag-complexity" class="metric__value">—</div>
-              <div id="diag-complexity-note" class="metric__note">—</div>
+              <div class="metric__label">Målbild</div>
+              <div id="goal" class="metric__value">—</div>
+              <div id="goal-note" class="metric__note">—</div>
             </div>
             <div class="metric">
-              <div class="metric__label">Datamognad</div>
-              <div id="diag-data" class="metric__value">—</div>
-              <div id="diag-data-note" class="metric__note">—</div>
+              <div class="metric__label">Risk om du överbygger</div>
+              <div id="risk" class="metric__value">—</div>
+              <div id="risk-note" class="metric__note">—</div>
             </div>
             <div class="metric">
-              <div class="metric__label">Säljberoende</div>
-              <div id="diag-sales" class="metric__value">—</div>
-              <div id="diag-sales-note" class="metric__note">—</div>
+              <div class="metric__label">Vad du bör fokusera på nu</div>
+              <div id="next" class="metric__value">—</div>
+              <div id="next-note" class="metric__note">—</div>
             </div>
           </div>
-
-          <div class="metric" style="margin-top: 10px;">
-            <div class="metric__label">Vad detta betyder</div>
-            <div id="diag-meaning" class="metric__value" style="font-size: 16px; font-weight: 800;">—</div>
-            <div id="diag-meaning-note" class="metric__note">—</div>
-          </div>
-        </section>
-
-        <!-- MODULES -->
-        <section id="modules" class="section">
-          <h3 class="section__title">Rekommenderade byggblock</h3>
-          <p class="section__sub" id="modules-sub">
-            Klicka på varje byggblock för detaljer. Detta är där du ser vad som skapar intent (inte bara sidvisningar).
-          </p>
-
-          <div id="module-list" class="accordion" aria-label="Setup-moduler"></div>
-        </section>
-
-        <!-- PLAN -->
-        <section id="plan" class="section">
-          <h3 class="section__title">7-dagarsplan</h3>
-          <p class="section__sub">
-            Minimal plan som ger mätbar effekt. Inte “implementera allt”, utan få systemet att börja producera signal.
-          </p>
-
-          <ol id="plan-steps" class="steps"></ol>
-
-          <div class="cta-row">
-            <button class="btn primary" id="btn-copy-plan" type="button">Kopiera plan</button>
-            <a class="btn ghost" href="#tools" id="jump-to-tools">Gå till verktyg</a>
-          </div>
-        </section>
-
-        <!-- TOOLS -->
-        <section id="tools" class="section">
-          <h3 class="section__title">Verktyg och resurser</h3>
-          <p class="section__sub">
-            Riktiga länkar. Outbound-klick är en bra proxy för “hög intent”.
-          </p>
-
-          <div id="tool-links" class="tools"></div>
-
-          <div class="cta-row">
-            <a class="btn ghost" href="#overview" id="back-to-top">Till toppen</a>
-            <button class="btn primary" id="btn-open-all" type="button">Öppna verktygslistan (modal)</button>
-          </div>
-
-          <div class="fine">
-            <details>
-              <summary>Debug</summary>
-              <pre id="debug"></pre>
-            </details>
-          </div>
-        </section>
-      </div>
-    </section>
-
-    <footer class="footer">
-      <span>GA4/GTM-projekt: diagnostik + event naming är konsekvent.</span>
-    </footer>
-  </main>
-
-  <dialog id="tools-modal" class="modal">
-    <div class="modal__inner">
-      <div class="modal__head">
-        <strong id="modal-title">Verktyg</strong>
-        <button class="btn ghost" id="modal-close" type="button">Stäng</button>
-      </div>
-      <div id="modal-body" class="modal__body"></div>
-    </div>
-  </dialog>
-
-  <script>
-    // -----------------------------
-    // dataLayer helper
-    // -----------------------------
-    window.dataLayer = window.dataLayer || [];
-    const QUIZ_ID = "ma_stack_quiz_v1";
-
-    const dlPush = (event, params = {}) => {
-      const payload = {
-        event,
-        ...params,
-        quiz_id: QUIZ_ID,
-        page_path: location.pathname,
-        page_title: document.title,
-        ts: Date.now(),
-      };
-      window.dataLayer.push(payload);
-      console.log("[dataLayer.push]", payload);
-    };
-
-    const $ = (s) => document.querySelector(s);
-
-    // -----------------------------
-    // Content model per stack (landing copy + sections)
-    // -----------------------------
-    const STACK_CONTENT = {
-      starter: {
-        badge: "Starter",
-        title: "Starter stack",
-        summary:
-          "Snabb effekt utan systemskuld. Du bygger minimum som går att mäta och iterera — inte en Frankenstack.",
-        goal: ["Få ordning snabbt", "MVP: 1–2 flöden + ren mätning."],
-        risk: ["Verktygssprawl", "Att köpa för tungt innan process/data sitter."],
-        next: ["Instrumentera events", "Bygg 1–2 nurturing-flöden och mät impact."],
-        modules: [
-          { id: "ma_tool_light", title: "MA-verktyg (lätt)", why: "Du behöver automation, inte enterprise-arkitektur.",
-            build: ["Segment (2–4 tydliga målgrupper)", "1 onboarding/nurture-flöde", "1 re-engagement-flöde"],
-            measure: ["CTA-klick", "form_start/form_submit", "completion → setup_view"] },
-          { id: "tracking_ga4_gtm", title: "GA4 + GTM (ren eventmodell)", why: "Utan stabil tracking får du bara känslor.",
-            build: ["Event-taxonomi (start → svar → completion → CTA)", "Parametrar: question_id, answer_id, result_stack", "Key events: complete, cta_click, outbound"],
-            measure: ["drop-off per fråga", "time_per_question", "CTA-rate per result_stack"] },
-          { id: "forms_consent", title: "Forms + consent", why: "Formulär är där intent blir mätbart (och GDPR kan spränga allt).",
-            build: ["Standardfält", "Consent checkbox", "Tydlig success state"],
-            measure: ["form_start", "field_error", "form_submit", "form_abandon"] },
-          { id: "dashboard_light", title: "Dashboard (light)", why: "Du behöver insight → action. Inte 40 widgets.",
-            build: ["Looker Studio", "1 funnel", "1 segment vy", "1 trendvy"],
-            measure: ["weekly review: vad ändrar du nästa sprint?"] },
-        ],
-        plan: [
-          { day: "Dag 1", do: "Spika event naming + GTM mapping.", outcome: "Du kan lita på datat." },
-          { day: "Dag 2", do: "Bygg quiz funnel i GA4 Explorations.", outcome: "Drop-off per fråga." },
-          { day: "Dag 3", do: "Skapa 1 CTA och 1 form (fake lead).", outcome: "Micro-conversions." },
-          { day: "Dag 4", do: "Bygg 1 nurture-flöde (simulerat).", outcome: "Signal om intent." },
-          { day: "Dag 5", do: "Segment: new/returning + device.", outcome: "Du hittar friktion." },
-          { day: "Dag 6", do: "A/B: 8 frågor vs 10 frågor.", outcome: "Completion vs intent." },
-          { day: "Dag 7", do: "Skriv insikter + iteration.", outcome: "Analysmognad." },
-        ],
-        tools: [
-          { id: "activecampaign", label: "ActiveCampaign", href: "https://www.activecampaign.com/" },
-          { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
-          { id: "ga4", label: "Google Analytics", href: "https://analytics.google.com/" },
-          { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
-          { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" },
-        ],
-      },
-
-      growth_hubspot: {
-        badge: "Growth",
-        title: "Growth stack (HubSpot)",
-        summary:
-          "Ni är redo för en all-in-one där CRM och automation sitter ihop. Fokus: lifecycle, scoring och tydliga segment.",
-        goal: ["Sätt systemet", "Synka marknad + sälj via samma data."],
-        risk: ["Implementera utan governance", "Bli kampanjdriven istället för systemdriven."],
-        next: ["Definiera lifecycle", "Implementera scoring + 2 nurture-spår."],
-        modules: [
-          { id: "crm_source_of_truth", title: "CRM som källa till sanning", why: "Om CRM inte är sant är resten teater.",
-            build: ["Lifecycle stages", "Obligatoriska fält", "Naming conventions"],
-            measure: ["stage conversion", "field completeness", "duplicate rate"] },
-          { id: "nurture_scoring", title: "Nurturing + lead scoring", why: "Separera nyfikna från köpredo.",
-            build: ["Implicit/explicit scoring", "SLA MQL→SQL", "2 nurture-spår"],
-            measure: ["time-to-MQL", "SQL rate", "drop-offs per segment"] },
-          { id: "ga4_funnel_model", title: "GA4 funnel + content signal", why: "Mät beteende som predikar affär.",
-            build: ["Content-grouping", "Event params", "Audiences per intent"],
-            measure: ["CTA per content-group", "cohort retention", "scroll vs conversion"] },
-          { id: "ops_rhythm", title: "Ops-rutiner (weekly QA)", why: "Automation utan QA blir snabbare fel.",
-            build: ["Weekly QA", "Broken flow checks", "Consent checks"],
-            measure: ["error events", "deliverability trend", "broken flow rate"] },
-        ],
-        plan: [
-          { day: "Dag 1", do: "Lifecycle + definitions (MQL/SQL) dokumenteras.", outcome: "Alla pratar samma språk." },
-          { day: "Dag 2", do: "Implementera scoring (minimalt).", outcome: "Prioritering." },
-          { day: "Dag 3", do: "Bygg 2 nurture-spår.", outcome: "Systematisk rörelse." },
-          { day: "Dag 4", do: "GA4 audiences för intent.", outcome: "Aktiverbara segment." },
-          { day: "Dag 5", do: "Dashboard: pipeline light.", outcome: "Sälj bryr sig." },
-          { day: "Dag 6", do: "QA-rutin + fel-event.", outcome: "Du fångar problem tidigt." },
-          { day: "Dag 7", do: "Iterera copy/CTA per segment.", outcome: "Analys → förändring." },
-        ],
-        tools: [
-          { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
-          { id: "ga4", label: "Google Analytics", href: "https://analytics.google.com/" },
-          { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
-          { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" },
-        ],
-      },
-
-      scale_revops: {
-        badge: "Scale",
-        title: "Scale stack (RevOps)",
-        summary:
-          "Ni behöver orkestrering mellan marknad och sälj. Fokus: integrationer, governance och rapportering som styr beslut.",
-        goal: ["Skala utan kaos", "Mätbar pipeline-effekt, inte bara leads."],
-        risk: ["Datakaos via integrationer", "Att bygga för mycket för tidigt."],
-        next: ["Datamodell + definitions", "Insight → action-loop."],
-        modules: [
-          { id: "governance", title: "Governance", why: "Skala utan governance = snabbare haveri.",
-            build: ["Data owners", "Change process", "Naming + field policy"],
-            measure: ["data drift", "schema changes", "field completeness"] },
-          { id: "integrations", title: "Integrationer (systemdisciplin)", why: "Skillnaden mellan verktyg och system.",
-            build: ["Field mapping", "Error logging", "Sync rules"],
-            measure: ["sync failure rate", "latency", "duplicate creation"] },
-          { id: "advanced_scoring_sla", title: "Advanced scoring + SLA", why: "Sälj behöver prioritering, inte fler leads.",
-            build: ["Segment scoring", "SLA timers", "Recycling rules"],
-            measure: ["SLA breaches", "time-to-first-touch", "SQL conversion"] },
-          { id: "bi_pipeline", title: "BI-light (pipeline dashboards)", why: "Se pipeline-effect utan attribution-religion.",
-            build: ["Pipeline views", "Stage conversion", "Cohorts"],
-            measure: ["velocity", "stage drop-off", "pipeline influenced"] },
-        ],
-        plan: [
-          { day: "Dag 1", do: "Kartlägg system + owners.", outcome: "Du vet var sanningen bor." },
-          { day: "Dag 2", do: "Definiera data contracts (fält + regler).", outcome: "Stabil synk." },
-          { day: "Dag 3", do: "Inför error logging i integrationer.", outcome: "Du ser problem direkt." },
-          { day: "Dag 4", do: "Bygg SLA-event och breaches.", outcome: "Du mäter samarbete." },
-          { day: "Dag 5", do: "GA4 audiences + activation plan.", outcome: "Segment som används." },
-          { day: "Dag 6", do: "Pipeline dashboards.", outcome: "Sälj bryr sig." },
-          { day: "Dag 7", do: "Iterera process + QA-loop.", outcome: "Mindre incidenter." },
-        ],
-        tools: [
-          { id: "hubspot", label: "HubSpot", href: "https://www.hubspot.com/" },
-          { id: "pardot", label: "Salesforce Pardot", href: "https://www.salesforce.com/products/marketing-cloud/account-engagement/" },
-          { id: "ga4", label: "Google Analytics", href: "https://analytics.google.com/" },
-          { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
-          { id: "looker_studio", label: "Looker Studio", href: "https://lookerstudio.google.com/" },
-        ],
-      },
-
-      enterprise_light: {
-        badge: "Enterprise-light",
-        title: "Enterprise-light stack",
-        summary:
-          "Hög komplexitet och många system. Här är arkitektur och governance viktigare än kampanjer.",
-        goal: ["Styrbar arkitektur", "Datakvalitet + compliance först."],
-        risk: ["Lång implementation", "Drunkna i integrationer utan owners."],
-        next: ["Inventera system", "Data contracts + consent flows."],
-        modules: [
-          { id: "architecture", title: "Arkitektur", why: "Utan arkitektur får du spagetti.",
-            build: ["Master data", "Sync principles", "Ownership map"],
-            measure: ["incident rate", "change lead time", "duplication"] },
-          { id: "ipaas_monitoring", title: "iPaaS + monitorering", why: "Enterprise behöver spårbarhet och felhantering.",
-            build: ["Retry rules", "Monitoring", "Alerting"],
-            measure: ["failure rate", "recovery time", "error categories"] },
-          { id: "dwh_bi", title: "Datalager/BI", why: "Analysera CRM + produkt + events + revenue.",
-            build: ["Event ingestion", "CRM sync", "Core models"],
-            measure: ["freshness", "coverage", "join success"] },
-          { id: "compliance", title: "Compliance (GDPR)", why: "Om compliance faller: allt faller.",
-            build: ["Consent mgmt", "Retention policy", "Access logs"],
-            measure: ["consent rate", "deletion requests", "audit completeness"] },
-        ],
-        plan: [
-          { day: "Dag 1", do: "Systeminventering + owners.", outcome: "Du vet vem som äger vad." },
-          { day: "Dag 2", do: "Data contracts + schema.", outcome: "Du minskar risk." },
-          { day: "Dag 3", do: "Consent flows + retention policy.", outcome: "Compliance på plats." },
-          { day: "Dag 4", do: "Monitoring + alerting (integrationer).", outcome: "Driftbarhet." },
-          { day: "Dag 5", do: "Eventmodell + governance.", outcome: "Stabil spårning." },
-          { day: "Dag 6", do: "BI core dashboards.", outcome: "Datadrivna beslut." },
-          { day: "Dag 7", do: "Iterera process + QA-loop.", outcome: "Mindre incidenter." },
-        ],
-        tools: [
-          { id: "salesforce", label: "Salesforce", href: "https://www.salesforce.com/" },
-          { id: "marketing_cloud", label: "Salesforce Marketing Cloud", href: "https://www.salesforce.com/products/marketing-cloud/overview/" },
-          { id: "ga4", label: "Google Analytics", href: "https://analytics.google.com/" },
-          { id: "gtm", label: "Google Tag Manager", href: "https://tagmanager.google.com/" },
-        ],
-      },
-    };
-
-    // -----------------------------
-    // Read stack + last payload (for diagnostics)
-    // -----------------------------
-    function getStackFromUrlOrStorage() {
-      const params = new URLSearchParams(location.search);
-      const fromUrl = params.get("stack");
-      const fromStorage = localStorage.getItem("ma_quiz_last_result");
-      const stack = fromUrl || fromStorage || "starter";
-      return STACK_CONTENT[stack] ? stack : "starter";
-    }
-
-    function getLastQuizPayload() {
-      try {
-        const raw = localStorage.getItem("ma_quiz_last_payload");
-        if (!raw) return null;
-        const parsed = JSON.parse(raw);
-        // basic validation
-        if (!parsed || typeof parsed !== "object") return null;
-        return parsed;
-      } catch {
-        return null;
-      }
-    }
-
-    function humanBucket(bucket) {
-      // buckets are: low, medium, high, very_high
-      const map = {
-        low: "Låg",
-        medium: "Medel",
-        high: "Hög",
-        very_high: "Mycket hög",
-      };
-      return map[bucket] || bucket;
-    }
-
-    function meaningFromDiagnostics({ complexity_bucket, data_bucket, sales_bucket }) {
-      // blunt, useful interpretation
-      // data is the main “system readiness” lever
-      if (data_bucket === "low" && complexity_bucket !== "low") {
-        return {
-          headline: "Du vill skala system — men datat kommer bromsa dig.",
-          note: "Fokusera på datamodell, fältdisciplin och governance innan du lägger mer automation.",
-        };
-      }
-      if (sales_bucket === "high" && data_bucket === "medium") {
-        return {
-          headline: "Säljberoendet är högt — du behöver tight SLA och prioritering.",
-          note: "Bygg scoring + MQL→SQL-flöden och mät time-to-first-touch.",
-        };
-      }
-      if (data_bucket === "high" && complexity_bucket === "medium") {
-        return {
-          headline: "Bra datamognad — du kan skapa smart orkestrering utan kaos.",
-          note: "Lägg krut på segment, triggers och 2–3 tydliga journeys.",
-        };
-      }
-      if (complexity_bucket === "very_high" && data_bucket === "very_high") {
-        return {
-          headline: "Hög komplexitet + hög datamognad — arkitektur först, kampanj sen.",
-          note: "Integrationsdisciplin och monitorering är viktigare än fler flöden.",
-        };
-      }
-      return {
-        headline: "Du kan vinna mest på att göra färre saker, bättre, och mäta hårdare.",
-        note: "Fokusera på en tydlig funnel och en weekly insight → action-loop.",
-      };
-    }
-
-    // -----------------------------
-    // Render helpers
-    // -----------------------------
-    function renderModules(stackKey, modules) {
-      const list = $("#module-list");
-      list.innerHTML = "";
-
-      modules.forEach((m, idx) => {
-        const item = document.createElement("div");
-        item.className = "accordion__item";
-        item.dataset.moduleId = m.id;
-
-        item.innerHTML = `
-          <button class="accordion__btn" type="button" aria-expanded="false">
-            <span class="accordion__title">${m.title}</span>
-            <span class="accordion__meta">Varför / Bygg / Mät</span>
-          </button>
-          <div class="accordion__panel" hidden>
-            <div class="panel">
-              <div class="panel__col">
-                <div class="panel__label">Varför</div>
-                <div class="panel__text">${m.why}</div>
-              </div>
-              <div class="panel__col">
-                <div class="panel__label">Bygg</div>
-                <ul class="panel__list">${m.build.map(x => `<li>${x}</li>`).join("")}</ul>
-              </div>
-              <div class="panel__col">
-                <div class="panel__label">Mät</div>
-                <ul class="panel__list">${m.measure.map(x => `<li>${x}</li>`).join("")}</ul>
-              </div>
-            </div>
-          </div>
-        `;
-
-        const btn = item.querySelector(".accordion__btn");
-        const panel = item.querySelector(".accordion__panel");
-
-        btn.addEventListener("click", () => {
-          const expanded = btn.getAttribute("aria-expanded") === "true";
-          btn.setAttribute("aria-expanded", String(!expanded));
-          panel.hidden = expanded;
-
-          dlPush("ma_setup_module_toggle", {
-            stack: stackKey,
-            module_id: m.id,
-            module_title: m.title,
-            module_index: idx + 1,
-            state: expanded ? "collapsed" : "expanded",
-          });
-        });
-
-        list.appendChild(item);
-      });
-    }
-
-    function renderPlan(stackKey, plan) {
-      const el = $("#plan-steps");
-      el.innerHTML = "";
-
-      plan.forEach((p, idx) => {
-        const li = document.createElement("li");
-        li.className = "steps__item";
-        li.innerHTML = `
-          <div class="steps__day">${p.day}</div>
-          <div class="steps__do">${p.do}</div>
-          <div class="steps__outcome">${p.outcome}</div>
-        `;
-        li.addEventListener("click", () => {
-          dlPush("ma_setup_plan_step_click", {
-            stack: stackKey,
-            step_index: idx + 1,
-            step_day: p.day,
-          });
-        });
-        el.appendChild(li);
-      });
-    }
-
-    function renderTools(stackKey, tools) {
-      const el = $("#tool-links");
-      el.innerHTML = "";
-
-      tools.forEach((t, idx) => {
-        const a = document.createElement("a");
-        a.className = "tool";
-        a.href = t.href;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.dataset.toolId = t.id;
-
-        a.innerHTML = `
-          <div class="tool__label">${t.label}</div>
-          <div class="tool__meta">Öppnas i ny flik</div>
-        `;
-
-        a.addEventListener("click", () => {
-          dlPush("ma_setup_outbound_click", {
-            stack: stackKey,
-            outbound_id: t.id,
-            outbound_label: t.label,
-            outbound_index: idx + 1,
-            context: "page",
-          });
-        });
-
-        el.appendChild(a);
-      });
-
-      // Modal content
-      const modalBody = $("#modal-body");
-      modalBody.innerHTML = `
-        <p class="fine" style="margin-top:0;">Alla länkar (för snabb test av outbound-intent):</p>
-        <div class="tools">
-          ${tools.map((t, idx) => `
-            <a class="tool" href="${t.href}" target="_blank" rel="noopener noreferrer"
-               data-tool-id="${t.id}" data-tool-idx="${idx+1}">
-              <div class="tool__label">${t.label}</div>
-              <div class="tool__meta">${t.href.replace("https://","")}</div>
-            </a>
-          `).join("")}
         </div>
-      `;
+      </section>
 
-      modalBody.querySelectorAll("a[data-tool-id]").forEach((link) => {
-        link.addEventListener("click", () => {
-          dlPush("ma_setup_outbound_click", {
-            stack: stackKey,
-            outbound_id: link.dataset.toolId,
-            outbound_label: link.querySelector(".tool__label")?.textContent || link.dataset.toolId,
-            outbound_index: Number(link.dataset.toolIdx || "0"),
-            context: "modal",
-          });
-        });
-      });
-    }
+      <!-- IMPLEMENTATION PLAN -->
+      <section class="section" id="plan">
+        <h3 class="section__title">Nästa 7 dagar: så kommer du igång</h3>
+        <p class="section__sub">
+          En praktisk handlingsplan för att implementera rekommendationen i din organisation.
+        </p>
+        <ol id="plan-steps" class="steps"></ol>
+      </section>
 
-    function wireAnchors(stackKey) {
-      document.querySelectorAll("a[data-anchor]").forEach((a) => {
-        a.addEventListener("click", () => {
-          dlPush("ma_setup_anchor_click", {
-            stack: stackKey,
-            anchor: a.dataset.anchor,
-          });
-        });
-      });
-    }
+      <!-- MODULES -->
+      <section class="section" id="modules">
+        <h3 class="section__title">Rekommenderade byggblock</h3>
+        <p class="section__sub">
+          Bygg dessa i ordning. Varje block är valt för att ge effekt utan att skapa systemskuld.
+        </p>
+        <div id="module-list" class="accordion"></div>
+      </section>
 
-    function trackScrollDepth(stackKey) {
-      const marks = [25, 50, 75, 90];
-      const fired = new Set();
+      <!-- TOOLS -->
+      <section class="section" id="tools">
+        <h3 class="section__title">Verktyg som passar din situation</h3>
+        <p class="section__sub">
+          Exempel på verktyg som matchar rekommendationen. Välj utifrån budget, team och ambition.
+        </p>
+        <div id="tool-links" class="tools"></div>
+      </section>
 
-      window.addEventListener("scroll", () => {
-        const doc = document.documentElement;
-        const max = doc.scrollHeight - doc.clientHeight;
-        if (max <= 0) return;
+      <div class="cta-row">
+        <a class="btn ghost" href="index.html">Gör quizet igen</a>
+      </div>
 
-        const percent = Math.round((window.scrollY / max) * 100);
-        for (const m of marks) {
-          if (!fired.has(m) && percent >= m) {
-            fired.add(m);
-            dlPush("ma_setup_scroll_depth", { stack: stackKey, percent: m });
-          }
-        }
-      }, { passive: true });
-    }
+    </div>
+  </section>
 
-    // -----------------------------
-    // Render
-    // -----------------------------
-    function render() {
-      const stackKey = getStackFromUrlOrStorage();
-      const c = STACK_CONTENT[stackKey];
-      const payload = getLastQuizPayload();
+</main>
 
-      // Header copy
-      const source = new URLSearchParams(location.search).get("stack") ? "url" : (localStorage.getItem("ma_quiz_last_result") ? "localStorage" : "default");
-      $("#subtitle").textContent = `Baserat på ditt quiz-resultat: ${c.title}`;
+<script>
+/* --------------------------------------------------
+   dataLayer helper
+-------------------------------------------------- */
+const dlPush = (event, params = {}) => {
+  window.dataLayer.push({
+    event,
+    ...params,
+    page_path: location.pathname,
+    ts: Date.now()
+  });
+};
 
-      $("#stack-badge").textContent = c.badge;
-      $("#stack-title").textContent = c.title;
-      $("#stack-summary").textContent = c.summary;
+/* --------------------------------------------------
+   Stack content (EXTERNAL user plans only)
+-------------------------------------------------- */
+const STACK_CONTENT = {
 
-      $("#goal").textContent = c.goal[0];
-      $("#goal-note").textContent = c.goal[1];
+  starter: {
+    badge: "Starter",
+    title: "Starter stack",
+    summary: "En enkel men stabil grund för Marketing Automation utan att bygga onödig komplexitet.",
+    goal: ["Kom igång snabbt", "Bygg något som går att skala senare"],
+    risk: ["För många verktyg för tidigt", "Automation utan tydligt mål"],
+    next: ["Få grundläggande struktur", "Börja mäta rätt beteenden"],
+    plan: [
+      { day: "Dag 1", do: "Definiera vad som räknas som en lead eller konvertering för er.", outcome: "Ni mäter rätt sak." },
+      { day: "Dag 2", do: "Sätt 2–4 enkla segment baserat på behov eller intent.", outcome: "Ni kan anpassa budskap utan komplexitet." },
+      { day: "Dag 3", do: "Bygg ett enkelt nurture-flöde (värde → case → CTA).", outcome: "Automation som faktiskt driver handling." },
+      { day: "Dag 4", do: "Standardisera formulär och definiera uppföljning.", outcome: "Intent blir spårbart." },
+      { day: "Dag 5", do: "Sätt en enkel funnel-dashboard.", outcome: "Ni ser vad som funkar." },
+      { day: "Dag 6", do: "Förbättra en sak baserat på data.", outcome: "Ni börjar arbeta iterativt." },
+      { day: "Dag 7", do: "Dokumentera flöden, segment och ansvar.", outcome: "Ni kan skala utan kaos." }
+    ],
+    modules: [
+      { title: "Enkel MA-plattform", text: "E-post, segment och grundläggande automation." },
+      { title: "Spårning & mätning", text: "Event-baserad mätning av intent." },
+      { title: "Formulär & consent", text: "Tydlig struktur för leads och GDPR." }
+    ],
+    tools: ["ActiveCampaign", "HubSpot", "Google Analytics", "Google Tag Manager"]
+  },
 
-      $("#risk").textContent = c.risk[0];
-      $("#risk-note").textContent = c.risk[1];
+  growth_hubspot: {
+    badge: "Growth",
+    title: "Growth stack (HubSpot)",
+    summary: "En sammanhållen setup där CRM och Marketing Automation arbetar som ett system.",
+    goal: ["Skapa struktur", "Synka marknad och sälj"],
+    risk: ["Implementera utan governance", "Bli kampanjdriven"],
+    next: ["Lifecycle-struktur", "Lead scoring"],
+    plan: [
+      { day: "Dag 1", do: "Definiera lifecycle-steg och kriterier.", outcome: "Gemensamt språk." },
+      { day: "Dag 2", do: "Städa CRM-minimum (fält, ägarskap).", outcome: "Stabil databas." },
+      { day: "Dag 3", do: "Inför lead scoring.", outcome: "Prioriterade leads." },
+      { day: "Dag 4", do: "Bygg två nurture-spår.", outcome: "Systematisk rörelse mot affär." },
+      { day: "Dag 5", do: "Definiera SLA mellan marknad och sälj.", outcome: "Tydligt ansvar." },
+      { day: "Dag 6", do: "Sätt pipeline-översikt.", outcome: "Synlig affärseffekt." },
+      { day: "Dag 7", do: "Inför veckovis QA-rutin.", outcome: "Systemet håller över tid." }
+    ],
+    modules: [
+      { title: "CRM som källa till sanning", text: "Lifecycle, ägarskap och struktur." },
+      { title: "Nurturing & scoring", text: "Flytta leads systematiskt." },
+      { title: "Ops-rutiner", text: "QA, consent, leveransbarhet." }
+    ],
+    tools: ["HubSpot", "GA4", "GTM", "Looker Studio"]
+  },
 
-      $("#next").textContent = c.next[0];
-      $("#next-note").textContent = c.next[1];
+  scale_revops: {
+    badge: "Scale",
+    title: "Scale stack (RevOps)",
+    summary: "För organisationer som behöver orkestrera marknad och sälj över flera system.",
+    goal: ["Skala kontrollerat", "Mät pipeline-påverkan"],
+    risk: ["Integrationskaos", "Otydligt ägarskap"],
+    next: ["Datamodell", "Governance"],
+    plan: [
+      { day: "Dag 1", do: "Kartlägg system och ägarskap.", outcome: "Klar ansvarsfördelning." },
+      { day: "Dag 2", do: "Definiera data- och integrationsregler.", outcome: "Mindre kaos." },
+      { day: "Dag 3", do: "Sätt monitorering på integrationer.", outcome: "Problem syns direkt." },
+      { day: "Dag 4", do: "Bygg SLA-logik för sälj.", outcome: "Styr beteende." },
+      { day: "Dag 5", do: "Segment-baserad scoring.", outcome: "Bättre prioritering." },
+      { day: "Dag 6", do: "Pipeline-dashboards.", outcome: "Datadrivna beslut." },
+      { day: "Dag 7", do: "Etablera insight → action-loop.", outcome: "Kontinuerlig förbättring." }
+    ],
+    modules: [
+      { title: "Governance", text: "Ägarskap och standarder." },
+      { title: "Integrationer", text: "Styrda och övervakade flöden." },
+      { title: "BI & rapportering", text: "Pipeline och velocity." }
+    ],
+    tools: ["HubSpot", "Salesforce", "GA4", "GTM"]
+  }
+};
 
-      // Diagnostics (from last quiz payload if available)
-      const diagSub = $("#diagnosis-sub");
-      const diagC = $("#diag-complexity");
-      const diagD = $("#diag-data");
-      const diagS = $("#diag-sales");
-      const diagCN = $("#diag-complexity-note");
-      const diagDN = $("#diag-data-note");
-      const diagSN = $("#diag-sales-note");
-      const diagMeaning = $("#diag-meaning");
-      const diagMeaningNote = $("#diag-meaning-note");
+/* --------------------------------------------------
+   Render
+-------------------------------------------------- */
+const params = new URLSearchParams(location.search);
+const stackKey = params.get("stack") || "starter";
+const c = STACK_CONTENT[stackKey] || STACK_CONTENT.starter;
 
-      let diagParams = {};
-      if (payload && payload.scores && payload.max && payload.buckets && payload.percents) {
-        const { scores, max, buckets, percents } = payload;
+document.getElementById("stack-badge").textContent = c.badge;
+document.getElementById("stack-title").textContent = c.title;
+document.getElementById("stack-summary").textContent = c.summary;
 
-        diagSub.textContent = "Det här är din profil. Vi använder den för att undvika att du väljer en stack som blir skuld.";
-        diagC.textContent = `${humanBucket(buckets.complexity_bucket)} (${percents.complexity_percent}%)`;
-        diagD.textContent = `${humanBucket(buckets.data_bucket)} (${percents.data_percent}%)`;
-        diagS.textContent = `${humanBucket(buckets.sales_bucket)} (${percents.sales_percent}%)`;
+document.getElementById("goal").textContent = c.goal[0];
+document.getElementById("goal-note").textContent = c.goal[1];
+document.getElementById("risk").textContent = c.risk[0];
+document.getElementById("risk-note").textContent = c.risk[1];
+document.getElementById("next").textContent = c.next[0];
+document.getElementById("next-note").textContent = c.next[1];
 
-        diagCN.textContent = `Poäng: ${scores.complexity} / ${max.complexity}`;
-        diagDN.textContent = `Poäng: ${scores.data} / ${max.data}`;
-        diagSN.textContent = `Poäng: ${scores.sales} / ${max.sales}`;
+const planEl = document.getElementById("plan-steps");
+c.plan.forEach(p => {
+  const li = document.createElement("li");
+  li.innerHTML = `<strong>${p.day}</strong>: ${p.do}<br><span class="steps__outcome">${p.outcome}</span>`;
+  planEl.appendChild(li);
+});
 
-        const meaning = meaningFromDiagnostics(buckets);
-        diagMeaning.textContent = meaning.headline;
-        diagMeaningNote.textContent = meaning.note;
+const moduleEl = document.getElementById("module-list");
+c.modules.forEach(m => {
+  const div = document.createElement("div");
+  div.className = "accordion__item";
+  div.innerHTML = `<strong>${m.title}</strong><p>${m.text}</p>`;
+  moduleEl.appendChild(div);
+});
 
-        // add to params for event sending
-        diagParams = {
-          result_stack: payload.result_stack || stackKey,
-          complexity_score: scores.complexity,
-          data_score: scores.data,
-          sales_score: scores.sales,
-          complexity_percent: percents.complexity_percent,
-          data_percent: percents.data_percent,
-          sales_percent: percents.sales_percent,
-          complexity_bucket: buckets.complexity_bucket,
-          data_bucket: buckets.data_bucket,
-          sales_bucket: buckets.sales_bucket,
-        };
+const toolEl = document.getElementById("tool-links");
+c.tools.forEach(t => {
+  const div = document.createElement("div");
+  div.className = "tool";
+  div.textContent = t;
+  toolEl.appendChild(div);
+});
 
-        // tweak overview fine line to include a diagnostic hook
-        $("#overview-fine").textContent =
-          "Diagnosen nedan är den viktiga delen: den säger var du ska lägga fokus för att få systemet att fungera i verkligheten.";
-      } else {
-        diagSub.textContent =
-          "Ingen quiz-diagnos hittades (du kan ha öppnat sidan direkt). Kör quizet först för att få scores och percent-buckets här.";
-        diagC.textContent = "—";
-        diagD.textContent = "—";
-        diagS.textContent = "—";
-        diagCN.textContent = "—";
-        diagDN.textContent = "—";
-        diagSN.textContent = "—";
-        diagMeaning.textContent = "Kör quizet för att få en riktig diagnos.";
-        diagMeaningNote.textContent = "Setupen är ändå korrekt för vald stack, men du tappar analysvärde utan diagnos.";
-      }
-
-      // Render sections
-      renderModules(stackKey, c.modules);
-      renderPlan(stackKey, c.plan);
-      renderTools(stackKey, c.tools);
-      wireAnchors(stackKey);
-      trackScrollDepth(stackKey);
-
-      // Modal handlers
-      const modal = $("#tools-modal");
-      $("#btn-open-all").addEventListener("click", () => {
-        dlPush("ma_setup_modal_open", { stack: stackKey, modal_id: "tools" });
-        modal.showModal();
-      });
-      $("#modal-close").addEventListener("click", () => {
-        dlPush("ma_setup_modal_close", { stack: stackKey, modal_id: "tools" });
-        modal.close();
-      });
-      modal.addEventListener("click", (e) => {
-        const rect = modal.getBoundingClientRect();
-        const inDialog = (
-          e.clientX >= rect.left && e.clientX <= rect.right &&
-          e.clientY >= rect.top && e.clientY <= rect.bottom
-        );
-        if (!inDialog) {
-          dlPush("ma_setup_modal_close", { stack: stackKey, modal_id: "tools", reason: "backdrop" });
-          modal.close();
-        }
-      });
-
-      // Copy plan
-      $("#btn-copy-plan").addEventListener("click", async () => {
-        const text = c.plan.map(p => `${p.day}: ${p.do} → ${p.outcome}`).join("\n");
-        try {
-          await navigator.clipboard.writeText(text);
-          dlPush("ma_setup_plan_copy", { stack: stackKey, ok: true });
-          alert("Plan kopierad.");
-        } catch {
-          dlPush("ma_setup_plan_copy", { stack: stackKey, ok: false });
-          alert("Kunde inte kopiera (browserblock).");
-        }
-      });
-
-      // Debug
-      $("#debug").textContent = JSON.stringify({
-        quiz_id: QUIZ_ID,
-        stack: stackKey,
-        source,
-        has_last_payload: Boolean(payload),
-        last_payload_result_stack: payload?.result_stack,
-        last_payload_completed_at: payload?.started_at ? "present" : "unknown",
-        tools_count: c.tools.length,
-        modules: c.modules.map(m => m.id),
-      }, null, 2);
-
-      // Page view event (+ include diagnostics if we have them)
-      dlPush("ma_setup_view", {
-        stack: stackKey,
-        stack_title: c.title,
-        ...diagParams
-      });
-    }
-
-    render();
-  </script>
+dlPush("ma_setup_view", { stack: stackKey });
+</script>
 </body>
 </html>

@@ -400,3 +400,28 @@ textarea {
   color: var(--text);
 }
 
+/* Fix: gradient that doesn't tile on mobile */
+html, body {
+  min-height: 100%;
+}
+
+body {
+  background: none !important; /* stop any tiling background */
+}
+
+/* Paint gradient on a fixed layer */
+body::before{
+  content:"";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  /* din gradient här (byt om du vill) */
+  background: radial-gradient(1200px 800px at 20% 10%, rgba(120, 140, 255, 0.20), transparent 60%),
+              radial-gradient(900px 700px at 80% 30%, rgba(255, 120, 200, 0.12), transparent 55%),
+              linear-gradient(180deg, rgba(8,10,16,1), rgba(8,10,16,1));
+  
+  background-repeat: no-repeat;
+  background-size: cover;
+}

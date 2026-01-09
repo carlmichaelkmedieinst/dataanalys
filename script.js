@@ -1,4 +1,4 @@
-// script.js (refactored: GA4-friendly naming convention)
+// script.js (refactored + orchestration Q6 + dynamic max + adjusted thresholds)
 (() => {
   // ----------------------------
   // Helpers
@@ -10,7 +10,7 @@
 
   function dlPush(event, params = {}) {
     const payload = {
-      event, // GTM custom event name
+      event,
       ...params,
       quiz_id: QUIZ_ID,
       page_path: location.pathname,
@@ -21,11 +21,22 @@
     console.log("[dataLayer.push]", payload);
   }
 
-  function bucketize(n, buckets) {
-    for (const b of buckets) {
-      if (n >= b.min && n <= b.max) return b.label;
-    }
-    return "unknown";
+  function pct(n, max) {
+    if (!max || max <= 0) return 0;
+    return Math.round((n / max) * 100);
+  }
+
+  function clamp(n, min, max) {
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function scoreBucketPercent(p) {
+    // Percent-based buckets: stable even if you change weights
+    // 0–24 low, 25–49 medium, 50–74 high, 75–100 very_high
+    if (p >= 75) return "very_high";
+    if (p >= 50) return "high";
+    if (p >= 25) return "medium";
+    return "low";
   }
 
   function getReturningHint() {
@@ -39,7 +50,6 @@
 
   // ----------------------------
   // Quiz definition
-  // - Each answer contributes to: complexity, data, sales
   // ----------------------------
   const QUESTIONS = [
     {
@@ -102,18 +112,38 @@
         { id: "revenue", text: "Systematiskt kopplat till revenue", score: { complexity: 3, data: 3, sales: 1 } },
       ],
     },
+
+    // ✅ Replaced Q6 with orchestration (more specific + stronger signal)
     {
-      id: "channels",
-      dimension: "channels",
-      title: "Vilka kanaler är viktigast för er idag?",
-      help: "Fler kanaler ökar behov av orkestrering och konsistens.",
+      id: "orchestration",
+      dimension: "orchestration",
+      title: "Hur arbetar ni med samordning mellan kanaler idag?",
+      help: "Marketing Automation skalar först när kanaler hänger ihop – inte bara existerar parallellt.",
       answers: [
-        { id: "email_only", text: "Mest e-post", score: { complexity: 0, data: 1, sales: 0 } },
-        { id: "email_web", text: "E-post + webb", score: { complexity: 1, data: 1, sales: 0 } },
-        { id: "multi", text: "Multi-channel (social, ads, events)", score: { complexity: 2, data: 2, sales: 1 } },
-        { id: "omni", text: "Omnichannel + flera marknader", score: { complexity: 3, data: 3, sales: 1 } },
+        {
+          id: "isolated",
+          text: "Kanaler används isolerat (e-post/webb/ads lever sina egna liv)",
+          score: { complexity: 0, data: 0, sales: 0 },
+        },
+        {
+          id: "manual_coordination",
+          text: "Viss samordning manuellt (samma kampanj i flera kanaler, utan gemensam logik)",
+          score: { complexity: 1, data: 1, sales: 0 },
+        },
+        {
+          id: "flow_based",
+          text: "Samordnade flöden (triggers i en kanal påverkar andra, t.ex. webb → e-post → sälj)",
+          // data väger tyngre: orkestrering kräver datamognad
+          score: { complexity: 2, data: 3, sales: 1 },
+        },
+        {
+          id: "orchestrated_data_driven",
+          text: "Orkestrerad, datadriven multikanal (segment/lifecycle styr upplevelsen)",
+          score: { complexity: 3, data: 4, sales: 1 },
+        },
       ],
     },
+
     {
       id: "integration_need",
       dimension: "integrations",
@@ -164,24 +194,32 @@
     },
   ];
 
+  // ----------------------------
+  // Dynamic max scores (future-proof)
+  // ----------------------------
+  function maxScoreFor(axis) {
+    return QUESTIONS.reduce((sum, q) => {
+      const max = Math.max(...q.answers.map(a => (a.score?.[axis] ?? 0)));
+      return sum + max;
+    }, 0);
+  }
+
+  const MAX = {
+    complexity: maxScoreFor("complexity"),
+    data: maxScoreFor("data"),
+    sales: maxScoreFor("sales"),
+  };
+  MAX.total = MAX.complexity + MAX.data + MAX.sales;
+
+  // ----------------------------
+  // Stack mapping (thresholds adjusted & normalized)
+  // ----------------------------
   const STACKS = [
     { key: "starter", title: "Starter stack" },
     { key: "growth_hubspot", title: "Growth stack (HubSpot)" },
     { key: "scale_revops", title: "Scale stack (RevOps)" },
     { key: "enterprise_light", title: "Enterprise-light stack" },
   ];
-
-  function pickStack(scores) {
-    const c = scores.complexity;
-    const d = scores.data;
-    const s = scores.sales;
-    const total = c + d + s;
-
-    if (total >= 22 && c >= 8 && d >= 8) return STACKS.find(x => x.key === "enterprise_light");
-    if (total >= 16 || (s >= 10 && d >= 6)) return STACKS.find(x => x.key === "scale_revops");
-    if (total >= 10 && d >= 4) return STACKS.find(x => x.key === "growth_hubspot");
-    return STACKS.find(x => x.key === "starter");
-  }
 
   function computeScores(answers) {
     const scores = { complexity: 0, data: 0, sales: 0 };
@@ -196,14 +234,26 @@
     return scores;
   }
 
-  function scoreLabel(score) {
-    const buckets = [
-      { min: 0, max: 7, label: "low" },
-      { min: 8, max: 15, label: "medium" },
-      { min: 16, max: 23, label: "high" },
-      { min: 24, max: 30, label: "very_high" },
-    ];
-    return bucketize(score, buckets);
+  function pickStack(scores) {
+    // Normalize to percentages, so changes in weights don't break distribution.
+    const total = scores.complexity + scores.data + scores.sales;
+
+    const pTotal = pct(total, MAX.total);
+    const pC = pct(scores.complexity, MAX.complexity);
+    const pD = pct(scores.data, MAX.data);
+    const pS = pct(scores.sales, MAX.sales);
+
+    // Adjusted thresholds:
+    // - Enterprise: very high total + high complexity + high data
+    // - Scale: high total OR high sales + decent data
+    // - Growth: medium+ total + decent data
+    // - Starter: everything else
+    //
+    // These are tuned to avoid "too many Scale/Enterprise" after making data heavier on orchestration.
+    if (pTotal >= 78 && pC >= 70 && pD >= 70) return STACKS.find(x => x.key === "enterprise_light");
+    if (pTotal >= 60 || (pS >= 70 && pD >= 45)) return STACKS.find(x => x.key === "scale_revops");
+    if (pTotal >= 40 && pD >= 30) return STACKS.find(x => x.key === "growth_hubspot");
+    return STACKS.find(x => x.key === "starter");
   }
 
   // ----------------------------
@@ -267,20 +317,17 @@
 
     state.question_enter_at = Date.now();
 
-    // UI
     qTag.textContent = `Dimension: ${q.dimension}`;
     qTitle.textContent = q.title;
     qHelp.textContent = q.help;
 
-    // Progress
     const total = QUESTIONS.length;
     const current = idx + 1;
     progressText.textContent = `Fråga ${current} av ${total}`;
-    const pct = Math.round((idx / total) * 100);
-    progressBar.style.width = `${pct}%`;
+    const progressPct = Math.round((idx / total) * 100);
+    progressBar.style.width = `${progressPct}%`;
     $(".progress")?.setAttribute("aria-valuenow", String(current));
 
-    // Answers
     answersEl.innerHTML = "";
     const selectedId = state.answers[q.id];
 
@@ -295,12 +342,10 @@
       answersEl.appendChild(btn);
     });
 
-    // Nav
     btnBack.disabled = idx === 0;
     btnNext.disabled = !selectedId;
     stateHint.textContent = selectedId ? "Bra. Nästa." : "Välj ett svar för att gå vidare.";
 
-    // Tracking
     dlPush("ma_quiz_question_view", {
       question_id: q.id,
       question_index: current,
@@ -319,7 +364,6 @@
     const idx = state.current_index;
     const q = QUESTIONS[idx];
 
-    // time spent since entering question (or last selection)
     const t = Date.now() - (state.question_enter_at || Date.now());
     state.per_question_time_ms[qid] = (state.per_question_time_ms[qid] || 0) + t;
     state.question_enter_at = Date.now();
@@ -338,7 +382,7 @@
       question_index: idx + 1,
       dimension: q.dimension,
       answer_id: aid,
-      answer_text: btn.textContent,
+      answer_text: btn.textContent, // OK i dataLayer, men registrera inte som GA4 custom dimension
       time_spent_ms: t,
     });
   }
@@ -385,21 +429,26 @@
 
     const duration_ms = Date.now() - (state.started_at || Date.now());
 
-    const complexity_bucket = scoreLabel(scores.complexity);
-    const data_bucket = scoreLabel(scores.data);
-    const sales_bucket = scoreLabel(scores.sales);
+    const pC = pct(scores.complexity, MAX.complexity);
+    const pD = pct(scores.data, MAX.data);
+    const pS = pct(scores.sales, MAX.sales);
+
+    const complexity_bucket = scoreBucketPercent(pC);
+    const data_bucket = scoreBucketPercent(pD);
+    const sales_bucket = scoreBucketPercent(pS);
 
     resultTitle.textContent = chosen.title;
     resultSummary.textContent =
-      "Din rekommendation baseras på komplexitet, datamognad och säljberoende. Klicka vidare för en tydlig landing page per stack.";
+      "Din rekommendation baseras på komplexitet, datamognad och säljberoende. Klicka vidare för en landing page per stack.";
 
     mComplexity.textContent = complexity_bucket;
     mData.textContent = data_bucket;
     mSales.textContent = sales_bucket;
 
-    mComplexityNote.textContent = `Poäng: ${scores.complexity} / 30`;
-    mDataNote.textContent = `Poäng: ${scores.data} / 30`;
-    mSalesNote.textContent = `Poäng: ${scores.sales} / 30`;
+    // ✅ Dynamic maxes (no more /30 lies)
+    mComplexityNote.textContent = `Poäng: ${scores.complexity} / ${MAX.complexity} (${pC}%)`;
+    mDataNote.textContent = `Poäng: ${scores.data} / ${MAX.data} (${pD}%)`;
+    mSalesNote.textContent = `Poäng: ${scores.sales} / ${MAX.sales} (${pS}%)`;
 
     // persist (non-PII)
     localStorage.setItem("ma_quiz_last_result", chosen.key);
@@ -409,7 +458,9 @@
       quiz_id: QUIZ_ID,
       started_at: state.started_at,
       duration_ms,
+      max: MAX,
       scores,
+      percents: { complexity_percent: pC, data_percent: pD, sales_percent: pS },
       buckets: { complexity_bucket, data_bucket, sales_bucket },
       result_stack: chosen.key,
       answers: state.answers,
@@ -425,13 +476,21 @@
       complexity_score: scores.complexity,
       data_score: scores.data,
       sales_score: scores.sales,
+      complexity_percent: pC,
+      data_percent: pD,
+      sales_percent: pS,
       complexity_bucket,
       data_bucket,
       sales_bucket,
       returning_user_hint: getReturningHint(),
     });
+// Persist last quiz payload for setup landing (non-PII)
+try {
+  localStorage.setItem("ma_quiz_last_payload", JSON.stringify(debug));
+} catch (e) {
+  // ignore storage errors
+}
 
-    // cache chosen for CTA
     btnCTA.dataset.resultStack = chosen.key;
   }
 
@@ -451,7 +510,6 @@
     });
 
     if (demo_fill) {
-      // random answers to stress-test tracking & analysis
       for (const q of QUESTIONS) {
         const pick = q.answers[Math.floor(Math.random() * q.answers.length)];
         state.answers[q.id] = pick.id;
@@ -469,7 +527,10 @@
   }
 
   function onCTA() {
-    const result_stack = btnCTA.dataset.resultStack || localStorage.getItem("ma_quiz_last_result") || "starter";
+    const result_stack =
+      btnCTA.dataset.resultStack ||
+      localStorage.getItem("ma_quiz_last_result") ||
+      "starter";
 
     dlPush("ma_quiz_result_cta_click", {
       cta_type: "recommended_setup",
@@ -489,10 +550,8 @@
   btnRestart.addEventListener("click", restart);
   btnCTA.addEventListener("click", onCTA);
 
-  // Initial screen
   showScreen(screenIntro);
 
-  // Optional light page view signal
   dlPush("ma_page_view", {
     returning_user_hint: getReturningHint(),
   });
